@@ -1,0 +1,640 @@
+<title>Anker</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Lexend:wght@400;500;600&display=swap">
+<style>
+/* Layout: eine ruhige, einspaltige Handy-App, max. 520px breit, große Tippflächen */
+:root{
+  --bg:#EDF1EF; --surface:#FFFFFF; --ink:#1C2A2C; --muted:#56676A; --line:#D3DCDA;
+  --accent:#2D6A6E; --accent-ink:#FFFFFF; --accent-soft:#D9E8E5;
+  --sand:#EFE3CA; --sand-ink:#5A4A2A;
+  --alarm:#B23E2E; --alarm-soft:#F6DCD6; --ok:#3B7A4B;
+  --f-display:"Lexend", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --r:18px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111A1B; --surface:#1A2627; --ink:#E5EEEC; --muted:#9DB0AE; --line:#2C3C3D;
+  --accent:#6DB3B3; --accent-ink:#0E1A1B; --accent-soft:#213839;
+  --sand:#3A3324; --sand-ink:#EBDDBE;
+  --alarm:#E5705C; --alarm-soft:#3D2420; --ok:#7CC08C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111A1B; --surface:#1A2627; --ink:#E5EEEC; --muted:#9DB0AE; --line:#2C3C3D;
+  --accent:#6DB3B3; --accent-ink:#0E1A1B; --accent-soft:#213839;
+  --sand:#3A3324; --sand-ink:#EBDDBE;
+  --alarm:#E5705C; --alarm-soft:#3D2420; --ok:#7CC08C; color-scheme:dark}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:17px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 40px}
+#app{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:1.6rem} h2{font-size:1.3rem} h3{font-size:1.05rem}
+p{margin:0} .muted{color:var(--muted)} .small{font-size:.9rem}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px}
+.brand{font-family:var(--f-display);font-weight:600;font-size:1.15rem;display:flex;align-items:center;gap:8px;color:var(--accent)}
+.brand svg{width:26px;height:26px}
+button,.btn{font:inherit;cursor:pointer;border:0;border-radius:14px;padding:14px 18px;min-height:52px;background:var(--accent);color:var(--accent-ink);font-family:var(--f-display);font-weight:500;font-size:1rem;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-align:center}
+button:focus-visible,.btn:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.ghost{background:transparent;color:var(--accent);border:2px solid var(--line)}
+.soft{background:var(--accent-soft);color:var(--ink)}
+.danger{background:var(--alarm);color:#fff}
+.wide{width:100%}
+.iconbtn{min-height:44px;min-width:44px;padding:8px 12px;background:transparent;color:var(--muted);border:2px solid var(--line)}
+.card{background:var(--surface);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:10px}
+.sos{background:var(--alarm);color:#fff;border-radius:24px;padding:26px 20px;min-height:120px;font-size:1.35rem;flex-direction:column;gap:4px;box-shadow:0 6px 0 color-mix(in srgb,var(--alarm) 60%,#000 40%)}
+.sos small{font-family:var(--f-body);font-weight:400;font-size:.95rem;opacity:.92}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{background:var(--surface);color:var(--ink);border-radius:var(--r);padding:16px;min-height:96px;flex-direction:column;align-items:flex-start;justify-content:space-between;text-align:left;font-weight:500}
+.tile svg{width:28px;height:28px;color:var(--accent)}
+.tile span.sub{font-family:var(--f-body);font-weight:400;font-size:.85rem;color:var(--muted)}
+label{font-weight:700;font-size:.95rem}
+input,textarea,select{font:inherit;width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);box-sizing:border-box}
+textarea{min-height:84px;resize:vertical}
+.field{display:flex;flex-direction:column;gap:6px}
+.choicecard{background:var(--surface);color:var(--ink);border:3px solid var(--line);border-radius:var(--r);padding:16px;text-align:left;flex-direction:column;align-items:stretch;gap:8px;font-weight:400}
+.choicecard.on{border-color:var(--accent);background:var(--accent-soft)}
+.choicecard b{font-family:var(--f-display);font-weight:600;font-size:1.05rem}
+.quote{background:var(--bg);border-radius:14px;padding:10px 12px;font-size:.95rem;font-style:italic}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;background:var(--sand);color:var(--sand-ink);font-size:.8rem;font-weight:700;letter-spacing:.02em}
+.progress{display:flex;gap:6px}.progress i{flex:1;height:6px;border-radius:3px;background:var(--line)}.progress i.on{background:var(--accent)}
+.contact{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.contact:first-child{border-top:0}
+.contact div{min-width:0}
+.hot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.hot:first-of-type{border-top:0}
+.hot .num{font-family:var(--f-display);font-variant-numeric:tabular-nums;font-size:1.05rem;user-select:all}
+.hot .btn{min-height:44px;padding:8px 14px}
+/* Chat */
+#chat{display:flex;flex-direction:column;gap:10px}
+.bubble{max-width:88%;padding:12px 16px;border-radius:20px;animation:pop .25s ease-out}
+.bubble.bot{background:var(--surface);border-bottom-left-radius:6px;align-self:flex-start}
+.bubble.me{background:var(--accent);color:var(--accent-ink);border-bottom-right-radius:6px;align-self:flex-end}
+@keyframes pop{from{transform:translateY(6px);opacity:.4}to{transform:none;opacity:1}}
+#acts{display:flex;flex-direction:column;gap:10px}
+.choice{background:var(--surface);color:var(--ink);border:2px solid var(--line);justify-content:flex-start;text-align:left}
+.scale{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.scale button{min-height:52px;padding:0;color:#fff;font-size:1.15rem}
+.scalelab{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted)}
+.exbox{background:var(--surface);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:12px}
+/* Atmen */
+.breath{display:flex;flex-direction:column;align-items:center;gap:14px}
+.ring{position:relative;width:220px;height:220px;max-width:100%;border-radius:50%;background:var(--accent-soft);display:grid;place-items:center}
+.orb{position:absolute;inset:0;border-radius:50%;background:var(--accent);opacity:.85;transform:scale(.45);transition:transform 4s ease-in-out}
+.blabel{position:relative;font-family:var(--f-display);font-size:1.3rem;font-weight:600;color:var(--accent-ink);text-align:center}
+.blabel span{display:block;font-size:2rem;font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips span{background:var(--accent-soft);padding:4px 10px;border-radius:99px;font-size:.9rem}
+.dots{display:flex;gap:8px}.dots i{width:14px;height:14px;border-radius:50%;background:var(--line)}.dots i.on{background:var(--accent)}
+.big{font-family:var(--f-display);font-size:3rem;font-weight:600;font-variant-numeric:tabular-nums;text-align:center}
+/* Alarm */
+.alarmring{width:200px;height:200px;border-radius:50%;margin:0 auto;display:grid;place-items:center;background:conic-gradient(var(--alarm) var(--p,100%),var(--alarm-soft) 0)}
+.alarmring div{width:160px;height:160px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-family:var(--f-display);font-size:3.4rem;font-weight:600;color:var(--alarm)}
+.cancel{min-height:84px;font-size:1.3rem;background:var(--ink);color:var(--bg)}
+.status{padding:10px 12px;border-radius:12px;background:var(--bg);font-size:.95rem}
+.status.ok{border-left:4px solid var(--ok)} .status.wait{border-left:4px solid var(--sand-ink)}
+/* Tagebuch */
+.chart{overflow-x:auto}
+.entry{padding:10px 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
+.entry:first-child{border-top:0}
+.skill{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.skill:first-child{border-top:0}
+.skill span{flex:1;min-width:0}
+.star{min-height:44px;min-width:44px;padding:0;background:transparent;color:var(--muted);font-size:1.4rem}
+.star.on{color:#D99A1E}
+.check{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+.check:first-child{border-top:0}
+.check input{width:26px;height:26px;flex:none;accent-color:var(--accent)}
+.note{background:var(--sand);color:var(--sand-ink);border-radius:14px;padding:12px 14px;font-size:.92rem}
+.toggle{display:flex;align-items:center;gap:12px}.toggle input{width:26px;height:26px;flex:none;accent-color:var(--accent)}
+@media (prefers-reduced-motion: reduce){.bubble{animation:none}.orb{transition-duration:.01s!important}}
+</style>
+
+<div id="app" aria-live="polite"></div>
+
+<script>
+/* ============ Speicher ============ */
+const KEY='anker_v1';
+const DEF={setup:false,name:'',age:'erw',tone:'kumpel',contacts:[],loc:true,
+  plan:{signs:'',helps:'',safe:'',reasons:''},
+  skillFav:[],skillOwn:[],stepsOwn:[],stepsDone:{},diary:[]};
+function clone(o){return JSON.parse(JSON.stringify(o))}
+function load(){try{const r=localStorage.getItem(KEY);if(r)return Object.assign(clone(DEF),JSON.parse(r))}catch(e){}return clone(DEF)}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let S=load();
+
+/* ============ Native Brücke (Android-App) ============ */
+const NATIVE=(()=>{try{return !!(window.AnkerNative&&AnkerNative.isAvailable())}catch(e){return false}})();
+
+/* ============ Hilfen ============ */
+const $=s=>document.querySelector(s);
+const app=$('#app');
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function mode(){return S.tone==='kumpel'?'k':(S.age==='erw'?'s':'d')}
+function v(k,d,s){const m=mode();return m==='k'?k:m==='d'?d:(s??d)}
+function nm(){return S.name?esc(S.name):''}
+function minor(){return S.age!=='erw'}
+let GEN=0,TIMERS=[];
+function later(fn,ms){const g=GEN;const id=setTimeout(()=>{if(g===GEN)fn()},ms);TIMERS.push(id);return id}
+function every(fn,ms){const id=setInterval(fn,ms);TIMERS.push(id);return id}
+function clearTimers(){TIMERS.forEach(t=>{clearTimeout(t);clearInterval(t)});TIMERS=[]}
+const sleep=ms=>new Promise(r=>later(r,ms));
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e}
+function intl(n){let x=String(n).replace(/[^\d+]/g,'');if(x.startsWith('+'))return x.slice(1);if(x.startsWith('00'))return x.slice(2);if(x.startsWith('0'))return '49'+x.slice(1);return x}
+function fmtDate(t){const d=new Date(t);return d.toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit'})+', '+d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}
+function lvlColor(n){return `hsl(${150-n*14} 48% 38%)`}
+
+const ICON={
+ anchor:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.5"/><path d="M12 7.5V21M7 11h10M4 14a8 8 0 0 0 16 0"/></svg>',
+ breath:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/></svg>',
+ eye:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+ box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>',
+ plan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>',
+ book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M8 9h6M8 13h6"/></svg>',
+ steps:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4v-4h4v-4h4V8h4"/></svg>',
+ phone:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2"/></svg>',
+ gear:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>'
+};
+
+/* ============ Hilfe-Nummern ============ */
+const HOTLINES=[
+ {n:'Notruf (Lebensgefahr)',t:'112',always:true},
+ {n:'TelefonSeelsorge (24 h, kostenlos)',t:'0800 111 0 111',always:true},
+ {n:'TelefonSeelsorge (2. Nummer)',t:'0800 111 0 222',always:true},
+ {n:'Nummer gegen Kummer, Kinder & Jugendliche',t:'116 111',minor:true}
+];
+function hotlinesHTML(){
+  const list=HOTLINES.filter(h=>h.always||minor()||h.t==='116 111');
+  const ordered=minor()?[list[0],...list.filter(h=>h.minor),...list.filter(h=>!h.minor&&h.t!=='112')]:list.filter(h=>!h.minor);
+  return ordered.map(h=>`<div class="hot"><div><div class="small muted">${esc(h.n)}</div><div class="num">${esc(h.t)}</div></div><a class="btn ${h.t==='112'?'danger':'soft'}" href="tel:${h.t.replace(/\s/g,'')}">${ICON.phone.replace('<svg','<svg width="18" height="18"')}Anrufen</a></div>`).join('');
+}
+
+/* ============ Navigation ============ */
+let V={name:S.setup?'home':'setup',step:0};
+function go(name,params={}){GEN++;clearTimers();V=Object.assign({name},params);render();window.scrollTo(0,0)}
+window.ankerBack=function(){if(V.name==='home'||V.name==='setup')return 'false';if(V.name==='alarm'&&V.phase==='count'){cancelAlarm();return 'true'}go('home');return 'true'};
+
+function topbar(title,back=true){
+  return `<div class="top">${back?`<button class="iconbtn" data-a="home" aria-label="Zurück zum Start">← Start</button>`:`<div class="brand">${ICON.anchor}Anker</div>`}
+  ${title?`<h2 style="flex:1;text-align:${back?'right':'left'}">${title}</h2>`:''}</div>`;
+}
+
+/* ============ Ansichten ============ */
+const VIEWS={};
+
+/* ---- Einrichtung ---- */
+VIEWS.setup=()=>{
+  const st=V.step||0, total=6;
+  const prog=`<div class="progress" aria-label="Schritt ${st+1} von ${total+1}">${Array.from({length:total+1},(_,i)=>`<i class="${i<=st?'on':''}"></i>`).join('')}</div>`;
+  const nav=(next='Weiter',skip=false)=>`<div class="row">${st>0?`<button class="ghost" data-a="setup-back">Zurück</button>`:''}<button style="flex:1" data-a="setup-next">${next}</button></div>${skip?`<button class="ghost wide" data-a="setup-skip">Erst mal überspringen</button>`:''}`;
+  let body='';
+  if(st===0) body=`<div class="brand">${ICON.anchor}Anker</div>
+    <h1>Hilfe für schwere Momente</h1>
+    <p>Anker begleitet dich, wenn Panik, Anspannung oder Leere zu viel werden. Die App spricht mit dir, führt dich durch kurze Übungen und kann im Notfall deine Vertrauenspersonen benachrichtigen.</p>
+    <p class="muted">Die Einrichtung dauert etwa 3 Minuten. Alles bleibt nur auf deinem Handy.</p>
+    <div class="note">Anker ersetzt keine Therapie und keinen Arzt. Die App hilft dir, durch akute Momente zu kommen, bis du Unterstützung hast.</div>
+    <button class="wide" data-a="setup-next">Los geht's</button>`;
+  if(st===1) body=`${prog}<h1>Wie dürfen wir dich nennen?</h1>
+    <div class="field"><label for="f-name">Vorname oder Spitzname</label><input id="f-name" autocomplete="given-name" value="${esc(S.name)}" placeholder="z. B. Robin"></div>
+    <p class="muted small">Der Name steht auch in der Nachricht, die im Notfall an deine Vertrauenspersonen geht.</p>${nav()}`;
+  if(st===2) body=`${prog}<h1>Wie alt bist du?</h1><p class="muted">Danach richten sich Sprache und Hilfe-Nummern.</p>
+    ${[['kind','Kind','bis 12 Jahre'],['jugend','Jugendlich','13 bis 17 Jahre'],['erw','Erwachsen','ab 18 Jahre']].map(([k,t,d])=>`<button class="choicecard ${S.age===k?'on':''}" data-a="set-age" data-v="${k}"><b>${t}</b><span class="muted">${d}</span></button>`).join('')}${nav()}`;
+  if(st===3) body=`${prog}<h1>Wie soll Anker mit dir sprechen?</h1><p class="muted">Du kannst das später jederzeit in den Einstellungen ändern.</p>
+    <button class="choicecard ${S.tone==='kumpel'?'on':''}" data-a="set-tone" data-v="kumpel"><b>Wie ein Kumpel</b><span>Locker, persönlich, auf Augenhöhe.${S.age==='kind'?' <span class="pill">Empfohlen</span>':''}</span>
+      <span class="quote">„Hey${S.name?' '+nm():''}, ich bin da. Wir kriegen das zusammen hin. Atme erst mal mit mir.“</span></button>
+    <button class="choicecard ${S.tone==='profi'?'on':''}" data-a="set-tone" data-v="profi"><b>Professionell</b><span>Ruhig, sachlich, wie eine Fachkraft.</span>
+      <span class="quote">${S.age==='erw'?'„Ich begleite Sie durch die nächsten Minuten. Konzentrieren Sie sich zunächst auf Ihre Atmung.“':'„Ich begleite dich durch die nächsten Minuten. Konzentriere dich zunächst auf deine Atmung.“'}</span></button>${nav()}`;
+  if(st===4) body=`${prog}<h1>Deine Vertrauenspersonen</h1>
+    <p>Wenn du bei der Stärke <b>10 von 10</b> angibst, startet ein Countdown von 10 Sekunden. Brichst du nicht ab, werden diese Personen automatisch benachrichtigt.</p>
+    ${contactsEditor()}
+    <div class="note">Sprich vorher mit den Personen, damit sie wissen, dass sie diese Rolle haben und was sie im Ernstfall tun sollen.</div>${nav('Weiter',S.contacts.length===0)}`;
+  if(st===5) body=`${prog}<h1>Dein Notfallplan</h1><p class="muted">Schreib das auf, solange es dir gut geht. In schweren Momenten zeigt Anker dir genau diese Sätze. Alles ist freiwillig.</p>${planForm()}${nav('Weiter',true)}`;
+  if(st===6) body=`${prog}<h1>${v('Fertig! Ich bin ab jetzt für dich da.','Die Einrichtung ist abgeschlossen.','Die Einrichtung ist abgeschlossen.')}</h1>
+    <p>${v('Wenn es dir schlecht geht, drück einfach auf den großen roten Knopf. Den Rest machen wir zusammen.','Wenn es dir schlecht geht, tippe auf den roten Knopf auf der Startseite. Ich führe dich dann Schritt für Schritt.','Wenn es Ihnen schlecht geht, tippen Sie auf den roten Knopf auf der Startseite. Ich führe Sie dann Schritt für Schritt.')}</p>
+    <div class="card"><h3>Diese Nummern helfen immer</h3>${hotlinesHTML()}</div>
+    ${!NATIVE?`<div class="note">Hier im Browser kann Anker Nachrichten nicht selbst abschicken. Im Notfall öffnet die App SMS, Anruf oder WhatsApp fertig vorbereitet, du tippst dann nur noch auf Senden. In der Android-App geht das vollautomatisch.</div>`:''}
+    <button class="wide" data-a="setup-done">Zur Startseite</button>`;
+  return `<div class="stack">${body}</div>`;
+};
+
+function contactsEditor(){
+  const m={sms:'SMS',call:'Anruf',both:'SMS + Anruf',wa:'WhatsApp (halbautomatisch)'};
+  return `<div class="card">${S.contacts.length?S.contacts.map((c,i)=>`<div class="contact"><div><b>${i+1}. ${esc(c.name)}</b><div class="small muted">${esc(c.num)} · ${m[c.how]}</div></div><button class="iconbtn" data-a="del-contact" data-i="${i}" aria-label="${esc(c.name)} entfernen">Entfernen</button></div>`).join(''):'<p class="muted">Noch niemand eingetragen.</p>'}</div>
+  <div class="card"><h3>Person hinzufügen</h3>
+    <div class="field"><label for="c-name">Name</label><input id="c-name" placeholder="z. B. Mama, Jonas"></div>
+    <div class="field"><label for="c-num">Telefonnummer</label><input id="c-num" type="tel" inputmode="tel" placeholder="z. B. 0170 1234567"></div>
+    <div class="field"><label for="c-how">Wie soll sie informiert werden?</label><select id="c-how">
+      <option value="both">SMS + Anruf (empfohlen)</option><option value="sms">Nur SMS</option><option value="call">Nur Anruf</option><option value="wa">WhatsApp (du tippst noch auf Senden)</option></select></div>
+    <p id="c-err" class="small" style="color:var(--alarm)" hidden></p>
+    <button class="soft" data-a="add-contact">Hinzufügen</button></div>
+  <label class="toggle"><input type="checkbox" id="c-loc" ${S.loc?'checked':''} data-a="toggle-loc"> Meinen Standort im Notfall mitschicken</label>
+  <p class="small muted">Reihenfolge: Alle bekommen zuerst eine SMS, danach wird die erste Person mit Anruf angerufen.</p>`;
+}
+function planForm(){
+  const f=[['signs','Woran merke ich, dass es schlimmer wird?','z. B. Ich ziehe mich zurück, mein Herz rast, ich schlafe kaum'],
+   ['helps','Was hilft mir, wenn es mir schlecht geht?','z. B. Musik von …, mit dem Hund raus, duschen'],
+   ['safe','Ein sicherer Ort (echt oder in Gedanken)','z. B. Omas Garten, mein Zimmer mit Decke'],
+   ['reasons','Wofür es sich lohnt, durchzuhalten','z. B. mein Bruder, mein Hund, der Urlaub im Sommer']];
+  return f.map(([k,l,p])=>`<div class="field"><label for="p-${k}">${l}</label><textarea id="p-${k}" placeholder="${p}">${esc(S.plan[k])}</textarea></div>`).join('');
+}
+function readPlan(){['signs','helps','safe','reasons'].forEach(k=>{const e=$('#p-'+k);if(e)S.plan[k]=e.value.trim()});save()}
+
+/* ---- Start ---- */
+VIEWS.home=()=>{
+  const hello=v(`Hey${S.name?' '+nm():''}, schön dass du da bist.`,`Hallo${S.name?' '+nm():''}.`,`Guten Tag${S.name?' '+nm():''}.`);
+  const sub=v('Egal wie es gerade aussieht, du musst da nicht allein durch.','Ich bin da, wenn du Unterstützung brauchst.','Ich bin da, wenn Sie Unterstützung brauchen.');
+  return `<div class="top"><div class="brand">${ICON.anchor}Anker</div><button class="iconbtn" data-a="go" data-v="settings" aria-label="Einstellungen">${ICON.gear}</button></div>
+  <div class="stack"><h1>${hello}</h1><p class="muted">${sub}</p></div>
+  <button class="sos" data-a="help">${v('Mir geht\'s gerade schlecht','Ich brauche jetzt Hilfe','Ich brauche jetzt Hilfe')}<small>${v('Tippen, ich bin sofort da','Tippen, um zu starten','Tippen, um zu starten')}</small></button>
+  <div class="grid">
+    <button class="tile" data-a="ex" data-v="atem">${ICON.breath}<div>Atmen<br><span class="sub">1 Minute</span></div></button>
+    <button class="tile" data-a="ex" data-v="g54321">${ICON.eye}<div>5-4-3-2-1<br><span class="sub">Zurück ins Hier</span></div></button>
+    <button class="tile" data-a="go" data-v="skills">${ICON.box}<div>Skills-Box<br><span class="sub">Was mir hilft</span></div></button>
+    <button class="tile" data-a="go" data-v="plan">${ICON.plan}<div>Notfallplan<br><span class="sub">Meine Sätze</span></div></button>
+    <button class="tile" data-a="go" data-v="diary">${ICON.book}<div>Tagebuch<br><span class="sub">${S.diary.length} Einträge</span></div></button>
+    <button class="tile" data-a="go" data-v="steps">${ICON.steps}<div>Kleine Schritte<br><span class="sub">Unter Leute kommen</span></div></button>
+  </div>
+  <div class="card"><h3>Hilfe-Nummern</h3>${hotlinesHTML()}</div>
+  ${S.contacts.length===0?`<div class="note">Du hast noch keine Vertrauensperson eingetragen. <button class="ghost wide" style="margin-top:8px" data-a="go" data-v="settings">Jetzt eintragen</button></div>`:''}`;
+};
+
+/* ---- Hilfe-Dialog ---- */
+VIEWS.help=()=>`<div class="top"><button class="iconbtn" data-a="home">Beenden</button><span class="pill">Anker ist bei dir</span></div><div id="chat"></div><div id="acts"></div>`;
+let H={};
+function chatEl(){return $('#chat')}
+function scrollEnd(){later(()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}),30)}
+async function bot(html,wait=650){await sleep(wait);const c=chatEl();if(!c)return;c.appendChild(el('div','bubble bot',html));scrollEnd()}
+function me(text){const c=chatEl();if(c){c.appendChild(el('div','bubble me',esc(text)));scrollEnd()}}
+function ask(opts){return new Promise(res=>{const a=$('#acts');if(!a)return;a.innerHTML='';opts.forEach(o=>{const b=el('button','choice '+(o.cls||''),o.label);b.onclick=()=>{a.innerHTML='';me(o.say||o.label.replace(/<[^>]+>/g,''));res(o.v)};a.appendChild(b)});scrollEnd()})}
+function askLevel(){return new Promise(res=>{const a=$('#acts');if(!a)return;a.innerHTML=`<div class="scale">${Array.from({length:11},(_,n)=>`<button style="background:${lvlColor(n)}" data-n="${n}" aria-label="${n} von 10">${n}</button>`).join('')}</div><div class="scalelab"><span>0 = ruhig</span><span>10 = geht gar nicht mehr</span></div>`;
+  a.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{const n=+b.dataset.n;a.innerHTML='';me(n+' von 10');res(n)});scrollEnd()})}
+function exBox(){const c=chatEl();const b=el('div','exbox');c.appendChild(b);scrollEnd();return b}
+
+const EXINFO={
+ atem:{name:'Atmen',intro:()=>v('Okay, wir atmen jetzt zusammen. Folg einfach dem Kreis: Wenn er größer wird, einatmen. Wenn er kleiner wird, langsam ausatmen.','Wir beginnen mit einer Atemübung. Atme ein, während der Kreis wächst, und atme langsam aus, während er kleiner wird.','Wir beginnen mit einer Atemübung. Atmen Sie ein, während der Kreis wächst, und atmen Sie langsam aus, während er kleiner wird.')},
+ g54321:{name:'5-4-3-2-1',intro:()=>v('Jetzt holen wir dich zurück ins Hier und Jetzt. Schreib mir einfach, was du um dich herum bemerkst. Es gibt kein Falsch.','Die nächste Übung lenkt deine Aufmerksamkeit auf deine Umgebung. Schreibe auf, was du wahrnimmst. Es gibt keine falschen Antworten.','Die nächste Übung lenkt Ihre Aufmerksamkeit auf Ihre Umgebung. Schreiben Sie auf, was Sie wahrnehmen. Es gibt keine falschen Antworten.')},
+ rechnen:{name:'Rechnen',intro:()=>v('Dein Kopf braucht was zu tun. Wir rechnen: immer 7 weniger, ab 100. Kein Stress, wenn\'s mal falsch ist.','Rechenaufgaben beschäftigen den Kopf und unterbrechen das Gedankenkreisen. Ziehe von 100 immer 7 ab.','Rechenaufgaben beschäftigen den Kopf und unterbrechen das Gedankenkreisen. Ziehen Sie von 100 immer 7 ab.')},
+ muskel:{name:'Anspannen & Loslassen',intro:()=>v('Die Anspannung muss irgendwo hin. Wir spannen gleich Muskeln fest an und lassen dann los. Fest, aber so, dass es nicht wehtut.','Wir machen eine kurze Muskelentspannung. Spanne die genannte Stelle kräftig an, aber nur so, dass es nicht schmerzt, und lass dann bewusst los.','Wir machen eine kurze Muskelentspannung. Spannen Sie die genannte Stelle kräftig an, aber nur so, dass es nicht schmerzt, und lassen Sie dann bewusst los.')},
+ skill:{name:'Skill',intro:()=>v('Lass uns was aus deiner Skills-Box ausprobieren. Such dir eins aus.','Wähle eine Sache aus deiner Skills-Box, die du jetzt ausprobierst.','Wählen Sie eine Sache aus Ihrer Skills-Box, die Sie jetzt ausprobieren.')}
+};
+const PLANS={panik:['atem','g54321','muskel'],gedanken:['g54321','rechnen','atem'],wut:['muskel','atem','skill'],leere:['g54321','skill','atem'],anders:['atem','g54321','skill']};
+
+async function helpFlow(){
+  H={before:null,after:null,what:null,ex:[],start:Date.now()};
+  await bot(v(`Hey${S.name?' '+nm():''}, ich bin da. Du bist damit nicht allein.`,`Ich bin da und begleite dich jetzt.`,`Ich bin da und begleite Sie jetzt.`),300);
+  await bot(v('Wie heftig ist es gerade? 0 heißt ganz ruhig, 10 heißt es geht gar nicht mehr.','Wie stark ist die Belastung gerade? 0 bedeutet ruhig, 10 bedeutet unerträglich.','Wie stark ist die Belastung gerade? 0 bedeutet ruhig, 10 bedeutet unerträglich.'));
+  const lvl=await askLevel(); H.before=lvl;
+  if(lvl>=10){await bot(v('Okay. Ich hole jetzt deine Leute dazu.','Ich benachrichtige jetzt deine Vertrauenspersonen.','Ich benachrichtige jetzt Ihre Vertrauenspersonen.'));await sleep(700);logDiary(true);return go('alarm',{from:'help'})}
+  await bot(v('Danke, dass du\'s mir sagst. Was ist gerade am schlimmsten?','Danke. Was steht gerade am meisten im Vordergrund?','Danke. Was steht gerade am meisten im Vordergrund?'));
+  const w=await ask([
+    {label:'Herzrasen, Atemnot, Panik',v:'panik'},
+    {label:'Gedanken, die nicht aufhören',v:'gedanken'},
+    {label:'Wut oder starke Anspannung',v:'wut'},
+    {label:'Leere, alles fühlt sich taub an',v:'leere'},
+    {label:'Ich habe Gedanken, mir etwas anzutun',v:'krise',cls:''},
+    {label:'Etwas anderes',v:'anders'}]);
+  H.what=w;
+  if(w==='krise'){logDiary(false);return go('krise')}
+  if(lvl<=3) await bot(v('Gut, dass du früh kommst. Das macht es leichter.','Gut, dass du dir früh Unterstützung holst.','Gut, dass Sie sich früh Unterstützung holen.'));
+  const plan=PLANS[w];
+  for(let i=0;i<plan.length;i++){
+    const ex=plan[i];H.ex.push(ex);
+    await bot(EXINFO[ex].intro());
+    await RUN[ex](exBox());
+    await bot(v('Und, wie heftig ist es jetzt?','Wie stark ist die Belastung jetzt?','Wie stark ist die Belastung jetzt?'));
+    const now=await askLevel(); H.after=now;
+    if(now>=10){await bot(v('Okay. Ich hole jetzt deine Leute dazu.','Ich benachrichtige jetzt deine Vertrauenspersonen.','Ich benachrichtige jetzt Ihre Vertrauenspersonen.'));await sleep(700);logDiary(true);return go('alarm',{from:'help'})}
+    if(now<=3)break;
+    if(i<plan.length-1){
+      await bot(now<H.before?v(`Von ${H.before} auf ${now}. Das ist schon was! Machen wir noch eine Runde?`,`Von ${H.before} auf ${now}, das ist ein Fortschritt. Möchtest du noch eine Übung machen?`,`Von ${H.before} auf ${now}, das ist ein Fortschritt. Möchten Sie noch eine Übung machen?`)
+        :v('Okay, noch nicht besser. Das ist normal, manchmal braucht es mehrere Anläufe. Wir probieren was anderes.','Das ist normal, manchmal braucht es mehrere Anläufe. Wir versuchen eine andere Übung.','Das ist normal, manchmal braucht es mehrere Anläufe. Wir versuchen eine andere Übung.'));
+      const go2=await ask([{label:'Ja, weiter',v:true},{label:'Nein, das reicht',v:false}]);
+      if(!go2)break;
+    }
+  }
+  logDiary(false);
+  const b=H.before,a=H.after;
+  if(a<b) await bot(v(`Du bist von <b>${b}</b> auf <b>${a}</b> runter. Das hast DU geschafft, ich hab nur mitgezählt. 💪`,`Du bist von <b>${b}</b> auf <b>${a}</b> gekommen. Das hast du selbst geschafft.`,`Sie sind von <b>${b}</b> auf <b>${a}</b> gekommen. Das haben Sie selbst geschafft.`));
+  else await bot(v('Es ist noch nicht besser geworden. Das liegt nicht an dir. Lass uns jemanden dazuholen.','Es ist noch nicht besser geworden. Das ist kein Versagen. Es ist jetzt sinnvoll, mit einem Menschen zu sprechen.','Es ist noch nicht besser geworden. Das ist kein Versagen. Es ist jetzt sinnvoll, mit einem Menschen zu sprechen.'));
+  if(a>=6) await bot(`<b>${v('Ruf jetzt jemanden an:','Bitte sprich jetzt mit jemandem:','Bitte sprechen Sie jetzt mit jemandem:')}</b>${contactCallList()}<div style="margin-top:8px">${hotlinesHTML()}</div>`);
+  const next=await ask([{label:'Zurück zur Startseite',v:'home'},{label:'Noch eine Übung',v:'more'},...(a>=6?[{label:'Alarm an meine Vertrauenspersonen',v:'alarm',cls:'danger'}]:[])]);
+  if(next==='home')go('home');
+  else if(next==='alarm')go('alarm',{from:'help'});
+  else {await bot(v('Welche?','Welche Übung möchtest du machen?','Welche Übung möchten Sie machen?'));const e=await ask(Object.keys(EXINFO).map(k=>({label:EXINFO[k].name,v:k})));await bot(EXINFO[e].intro());await RUN[e](exBox());await bot(v('Gut gemacht. Ich bin hier, wenn du mich wieder brauchst.','Gut gemacht. Du kannst jederzeit wiederkommen.','Gut gemacht. Sie können jederzeit wiederkommen.'));await ask([{label:'Zurück zur Startseite',v:1}]);go('home')}
+}
+function contactCallList(){
+  if(!S.contacts.length)return '';
+  return '<div class="stack" style="margin-top:8px">'+S.contacts.map(c=>`<div class="hot"><div><div class="small muted">${esc(c.name)}</div><div class="num">${esc(c.num)}</div></div><a class="btn soft" href="tel:${esc(c.num.replace(/[^\d+]/g,''))}">Anrufen</a></div>`).join('')+'</div>';
+}
+function logDiary(alarm){
+  S.diary.unshift({t:H.start||Date.now(),before:H.before,after:H.after,what:H.what,ex:H.ex.slice(),alarm:!!alarm});
+  S.diary=S.diary.slice(0,300);save();
+}
+
+/* ---- Übungen ---- */
+const RUN={};
+RUN.atem=(box,rounds=6)=>new Promise(res=>{
+  box.innerHTML=`<div class="breath"><div class="ring"><div class="orb"></div><div class="blabel">Bereit?<span></span></div></div><div class="muted small" data-c></div><button class="ghost" data-done>Fertig</button></div>`;
+  const orb=box.querySelector('.orb'),lab=box.querySelector('.blabel'),cnt=box.querySelector('[data-c]');
+  let r=0,phase=-1,left=0,ended=false;
+  const PH=[{t:'Einatmen',d:4,s:1},{t:'Ausatmen',d:6,s:.45}];
+  function setPhase(p){phase=p;left=PH[p].d;orb.style.transition=`transform ${PH[p].d}s ease-in-out`;orb.style.transform=`scale(${PH[p].s})`;lab.innerHTML=`${PH[p].t}<span>${left}</span>`}
+  function end(){if(ended)return;ended=true;clearInterval(id);orb.style.transform='scale(.45)';lab.innerHTML='Gut gemacht<span></span>';box.querySelector('[data-done]').remove();res()}
+  box.querySelector('[data-done]').onclick=end;
+  let id;
+  later(()=>{r=1;cnt.textContent=`Runde 1 von ${rounds}`;setPhase(0);id=every(()=>{if(ended)return;left--;if(left>0){lab.querySelector('span').textContent=left;return}
+    if(phase===0)setPhase(1);else{if(r>=rounds)return end();r++;cnt.textContent=`Runde ${r} von ${rounds}`;setPhase(0)}},1000)},900);
+});
+RUN.g54321=(box)=>new Promise(res=>{
+  const steps=[
+    {n:5,q:v('Nenn mir 5 Dinge, die du gerade <b>siehst</b>.','Nenne 5 Dinge, die du gerade <b>sehen</b> kannst.','Nennen Sie 5 Dinge, die Sie gerade <b>sehen</b> können.'),p:'z. B. die Lampe'},
+    {n:4,q:v('Jetzt 4 Dinge, die du <b>spürst</b>.','Nenne 4 Dinge, die du gerade <b>spüren</b> kannst.','Nennen Sie 4 Dinge, die Sie gerade <b>spüren</b> können.'),p:'z. B. den Boden unter den Füßen'},
+    {n:3,q:v('3 Dinge, die du <b>hörst</b>.','Nenne 3 Dinge, die du gerade <b>hören</b> kannst.','Nennen Sie 3 Dinge, die Sie gerade <b>hören</b> können.'),p:'z. B. ein Auto draußen'},
+    {n:2,q:v('2 Dinge, die du <b>riechst</b>.','Nenne 2 Dinge, die du <b>riechen</b> kannst.','Nennen Sie 2 Dinge, die Sie <b>riechen</b> können.'),p:'z. B. meinen Pulli'},
+    {n:1,q:v('Und 1 Sache, die du <b>schmeckst</b>.','Nenne 1 Sache, die du gerade <b>schmecken</b> kannst.','Nennen Sie 1 Sache, die Sie gerade <b>schmecken</b> können.'),p:'z. B. Zahnpasta'}];
+  const praise=[v('Stark.','Gut.','Gut.'),v('Läuft!','Sehr gut.','Sehr gut.'),v('Genau so.','Genau so.','Genau so.'),v('Super.','Gut gemacht.','Gut gemacht.')];
+  let si=0,items=[];
+  function draw(fb=''){const s=steps[si];
+    box.innerHTML=`<div class="dots">${Array.from({length:s.n},(_,i)=>`<i class="${i<items.length?'on':''}"></i>`).join('')}</div>
+    <p>${s.q}</p>${fb?`<p class="muted small">${fb}</p>`:''}
+    <div class="chips">${items.map(x=>`<span>${esc(x)}</span>`).join('')}</div>
+    <form class="row" data-f><input id="g-in" placeholder="${s.p}" autocomplete="off" style="flex:1;min-width:0"><button type="submit">OK</button></form>
+    <button class="ghost" data-skip>${v('Weiß nicht, weiter','Überspringen','Überspringen')}</button>`;
+    const inp=box.querySelector('#g-in');try{inp.focus({preventScroll:true})}catch(e){}
+    box.querySelector('[data-f]').onsubmit=e=>{e.preventDefault();const t=inp.value.trim();if(!t){inp.focus();return}items.push(t);if(items.length>=s.n)next();else draw(praise[items.length%praise.length])};
+    box.querySelector('[data-skip]').onclick=next;}
+  function next(){si++;items=[];if(si>=steps.length){box.innerHTML=`<p><b>${v('Geschafft! Du bist wieder mehr hier.','Übung abgeschlossen.','Übung abgeschlossen.')}</b></p>`;return res()}draw(v('Weiter geht\'s.','Als Nächstes:','Als Nächstes:'))}
+  draw();
+});
+RUN.rechnen=(box)=>new Promise(res=>{
+  let cur=100,ok=0;const need=6;
+  function draw(fb=''){box.innerHTML=`<div class="big">${cur} − 7 = ?</div>${fb?`<p class="muted">${fb}</p>`:''}
+    <form class="row" data-f><input id="r-in" type="number" inputmode="numeric" style="flex:1;min-width:0" aria-label="Ergebnis"><button type="submit">OK</button></form>
+    <p class="small muted">${ok} von ${need} geschafft</p><button class="ghost" data-skip>Fertig</button>`;
+    const inp=box.querySelector('#r-in');try{inp.focus({preventScroll:true})}catch(e){}
+    box.querySelector('[data-f]').onsubmit=e=>{e.preventDefault();const n=parseInt(inp.value,10);if(isNaN(n))return;const right=cur-7;
+      if(n===right){ok++;cur=right;if(ok>=need)return done();draw(v('Richtig! Weiter.','Richtig.','Richtig.'))}
+      else{cur=right;draw(v(`Fast, es wären ${right}. Egal, weiter von da.`,`Es wäre ${right} gewesen. Weiter von dort.`,`Es wäre ${right} gewesen. Weiter von dort.`))}};
+    box.querySelector('[data-skip]').onclick=done;}
+  function done(){box.innerHTML=`<p><b>${v('Nice, dein Kopf hatte gerade was anderes zu tun.','Übung abgeschlossen.','Übung abgeschlossen.')}</b></p>`;res()}
+  draw();
+});
+RUN.muskel=(box)=>new Promise(res=>{
+  const parts=[v('Hände zu Fäusten ballen','Hände zu Fäusten ballen','Hände zu Fäusten ballen'),v('Schultern hoch zu den Ohren ziehen','Schultern zu den Ohren hochziehen','Schultern zu den Ohren hochziehen'),v('Gesicht zusammenkneifen','Gesicht anspannen: Augen zukneifen, Lippen aufeinander','Gesicht anspannen: Augen zukneifen, Lippen aufeinander'),v('Zehen einkrallen, Beine anspannen','Zehen einkrallen und Beine anspannen','Zehen einkrallen und Beine anspannen')];
+  let pi=0,ph='an',left=5,ended=false;
+  function draw(){box.innerHTML=`<p class="small muted">Teil ${pi+1} von ${parts.length}</p><h3>${parts[pi]}</h3>
+    <div class="big" style="color:${ph==='an'?'var(--alarm)':'var(--ok)'}">${ph==='an'?'Anspannen':'Loslassen'}<br>${left}</div>
+    <p class="muted small">${ph==='an'?v('Fest! Aber ohne dass es wehtut.','Kräftig anspannen, ohne Schmerz.','Kräftig anspannen, ohne Schmerz.'):v('Lass alles fallen. Spür, wie es warm und schwer wird.','Bewusst loslassen und den Unterschied spüren.','Bewusst loslassen und den Unterschied spüren.')}</p>
+    <button class="ghost" data-skip>Fertig</button>`;box.querySelector('[data-skip]').onclick=end}
+  function end(){if(ended)return;ended=true;clearInterval(id);box.innerHTML=`<p><b>${v('Gut gemacht. Die Anspannung durfte mal raus.','Übung abgeschlossen.','Übung abgeschlossen.')}</b></p>`;res()}
+  draw();
+  const id=every(()=>{if(ended)return;left--;if(left<=0){if(ph==='an'){ph='los';left=10}else{pi++;if(pi>=parts.length)return end();ph='an';left=5}}draw()},1000);
+});
+RUN.skill=(box)=>new Promise(res=>{
+  const all=allSkills();const fav=all.filter(s=>S.skillFav.includes(s.t));
+  const pool=(fav.length>=3?fav:fav.concat(shuffle(all.filter(s=>!S.skillFav.includes(s.t)&&s.c!=='Kontakt')))).slice(0,4);
+  box.innerHTML=`<p>${v('Was davon probierst du?','Welche Sache probierst du jetzt aus?','Welche Sache probieren Sie jetzt aus?')}</p>`+pool.map((s,i)=>`<button class="choice" data-i="${i}">${esc(s.t)}</button>`).join('');
+  box.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{const s=pool[+b.dataset.i];let left=120,ended=false;
+    function draw(){box.innerHTML=`<h3>${esc(s.t)}</h3><p class="muted">${v('Nimm dir 2 Minuten dafür. Ich warte hier.','Nimm dir etwa 2 Minuten dafür.','Nehmen Sie sich etwa 2 Minuten dafür.')}</p><div class="big">${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}</div><button data-done>Fertig</button>`;box.querySelector('[data-done]').onclick=end}
+    function end(){if(ended)return;ended=true;clearInterval(id);box.innerHTML=`<p><b>${esc(s.t)}</b> ✓</p>`;res()}
+    draw();const id=every(()=>{if(ended)return;left--;if(left<=0)return end();draw()},1000);});
+});
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+/* Übung einzeln (von der Startseite) */
+VIEWS.ex=()=>`${topbar(EXINFO[V.ex].name)}<p>${EXINFO[V.ex].intro()}</p><div id="exhost"></div><div id="exafter"></div>`;
+async function runSingle(){
+  const host=$('#exhost');const box=el('div','exbox');host.appendChild(box);
+  await RUN[V.ex](box);
+  $('#exafter').innerHTML=`<div class="stack" style="margin-top:12px"><p>${v('Gut gemacht! Willst du noch was machen?','Gut gemacht.','Gut gemacht.')}</p><button data-a="home">Zur Startseite</button><button class="ghost" data-a="ex" data-v="${V.ex}">Nochmal</button></div>`;
+}
+
+/* ---- Krise ---- */
+VIEWS.krise=()=>{
+  const p=S.plan;
+  return `<div class="top"><button class="iconbtn" data-a="home">← Start</button></div>
+  <h1>${v('Danke, dass du mir das sagst.','Danke, dass du das ansprichst.','Danke, dass Sie das ansprechen.')}</h1>
+  <p>${v('Das ist mutig. Solche Gedanken sind ein Zeichen, dass du gerade echte Hilfe von einem Menschen brauchst, und die steht dir zu. Ruf bitte jetzt jemanden an.','Solche Gedanken sind ein Zeichen, dass du jetzt Unterstützung von einem Menschen brauchst. Bitte melde dich jetzt bei einer der Stellen unten.','Solche Gedanken sind ein Zeichen, dass Sie jetzt Unterstützung von einem Menschen brauchen. Bitte melden Sie sich jetzt bei einer der Stellen unten.')}</p>
+  <div class="card"><h3>${v('Wenn du in Gefahr bist: 112','Bei akuter Gefahr: 112','Bei akuter Gefahr: 112')}</h3>${hotlinesHTML()}</div>
+  ${S.contacts.length?`<div class="card"><h3>Deine Vertrauenspersonen</h3>${contactCallList()}<button class="danger" data-a="go" data-v="alarm">Alle benachrichtigen</button></div>`:''}
+  ${p.reasons?`<div class="card"><h3>${v('Wofür du durchhältst','Wofür es sich lohnt','Wofür es sich lohnt')}</h3><p>${esc(p.reasons).replace(/\n/g,'<br>')}</p></div>`:''}
+  ${p.safe?`<div class="card"><h3>Dein sicherer Ort</h3><p>${esc(p.safe).replace(/\n/g,'<br>')}</p></div>`:''}
+  <div class="card"><p>${v('Während du wartest oder telefonierst, kann ich mit dir atmen.','Während du wartest, kannst du die Atemübung nutzen.','Während Sie warten, können Sie die Atemübung nutzen.')}</p><button class="soft" data-a="ex" data-v="atem">Mit Anker atmen</button></div>`;
+};
+
+/* ---- Alarm ---- */
+VIEWS.alarm=()=>{
+  if(!S.contacts.length) return `<div class="top"><button class="iconbtn" data-a="home">← Start</button></div>
+    <h1>Hol dir jetzt Hilfe</h1><p>${v('Du hast noch keine Vertrauensperson eingetragen. Ruf bitte jetzt eine dieser Nummern an.','Es ist noch keine Vertrauensperson eingetragen. Bitte ruf jetzt eine dieser Nummern an.','Es ist noch keine Vertrauensperson eingetragen. Bitte rufen Sie jetzt eine dieser Nummern an.')}</p>
+    <div class="card">${hotlinesHTML()}</div><button class="ghost" data-a="go" data-v="settings">Vertrauensperson eintragen</button>`;
+  return `<div class="stack" id="alarmbox"></div>`;
+};
+let ALARM={};
+function startAlarm(){
+  if(!S.contacts.length)return;
+  ALARM={left:10,sent:false};V.phase='count';
+  const box=$('#alarmbox');
+  const names=S.contacts.map(c=>esc(c.name)).join(', ');
+  box.innerHTML=`<h1 style="text-align:center">${v('Ich hole jetzt Hilfe','Alarm wird gesendet','Alarm wird gesendet')}</h1>
+    <div class="alarmring" id="aring"><div id="anum">10</div></div>
+    <p style="text-align:center">Benachrichtigt werden: <b>${names}</b></p>
+    <button class="cancel wide" data-a="alarm-cancel">Abbrechen, ich habe mich vertippt</button>
+    <button class="danger wide" data-a="alarm-now">Sofort senden</button>
+    <p class="small muted" style="text-align:center">Bei Lebensgefahr: <b>112</b></p>`;
+  const id=every(()=>{ALARM.left--;const n=$('#anum'),r=$('#aring');if(n)n.textContent=ALARM.left;if(r)r.style.setProperty('--p',(ALARM.left*10)+'%');if(ALARM.left<=0){clearInterval(id);fireAlarm()}},1000);
+  ALARM.id=id;
+}
+function cancelAlarm(){clearInterval(ALARM.id);go('home')}
+function alarmText(loc){
+  return `Hier ist ${S.name||'jemand, der dich als Vertrauensperson eingetragen hat'}. Mir geht es gerade sehr schlecht (10 von 10). Bitte ruf mich sofort an oder komm vorbei.${loc?' Mein Standort: '+loc:''} (Automatisch gesendet von meiner App Anker)`;
+}
+function getLoc(){return new Promise(res=>{if(!S.loc)return res('');
+  try{if(NATIVE){const s=AnkerNative.getLocation();return res(s?`https://maps.google.com/?q=${s}`:'')}}catch(e){}
+  if(!navigator.geolocation)return res('');let done=false;const t=setTimeout(()=>{if(!done){done=true;res('')}},4000);
+  try{navigator.geolocation.getCurrentPosition(p=>{if(done)return;done=true;clearTimeout(t);res(`https://maps.google.com/?q=${p.coords.latitude.toFixed(5)},${p.coords.longitude.toFixed(5)}`)},()=>{if(!done){done=true;clearTimeout(t);res('')}},{timeout:3500,maximumAge:300000})}catch(e){done=true;clearTimeout(t);res('')}})}
+async function fireAlarm(){
+  clearInterval(ALARM.id);V.phase='sent';
+  const box=$('#alarmbox');if(!box)return;
+  box.innerHTML=`<h1>Einen Moment …</h1><p class="muted">Standort wird ermittelt.</p>`;
+  const loc=await getLoc();const msg=alarmText(loc);ALARM.msg=msg;
+  const res=[];let callTarget=null,waTarget=null;
+  for(const c of S.contacts){
+    const wantsSms=c.how==='sms'||c.how==='both', wantsCall=c.how==='call'||c.how==='both';
+    if(wantsSms){let ok=false;if(NATIVE){try{ok=AnkerNative.sendSms(c.num,msg)}catch(e){}}res.push({c,type:'sms',ok})}
+    if(wantsCall&&!callTarget)callTarget=c;
+    if(c.how==='wa'){res.push({c,type:'wa',ok:false});if(!waTarget)waTarget=c}
+  }
+  let callOk=false;
+  if(NATIVE){if(callTarget){try{callOk=AnkerNative.call(callTarget.num)}catch(e){}}else if(waTarget){try{AnkerNative.openUrl(waLink(waTarget))}catch(e){}}}
+  showAlarmResult(res,callTarget,callOk,loc);
+}
+function waLink(c,msg=ALARM.msg){return `https://wa.me/${intl(c.num)}?text=${encodeURIComponent(msg)}`}
+function smsLink(c,msg=ALARM.msg){return `sms:${c.num.replace(/[^\d+]/g,'')}?body=${encodeURIComponent(msg)}`}
+function showAlarmResult(res,callTarget,callOk,loc){
+  const box=$('#alarmbox');if(!box)return;
+  const rows=res.map(r=>{
+    if(r.type==='sms')return r.ok?`<div class="status ok">SMS an <b>${esc(r.c.name)}</b> wurde gesendet.</div>`
+      :`<div class="status wait"><div>SMS an <b>${esc(r.c.name)}</b> ist vorbereitet. Tippe auf Senden:</div><a class="btn soft wide" style="margin-top:8px" href="${smsLink(r.c)}">SMS öffnen</a></div>`;
+    return `<div class="status wait"><div>WhatsApp an <b>${esc(r.c.name)}</b>: Nachricht ist vorbereitet, tippe in WhatsApp auf Senden.</div><a class="btn soft wide" style="margin-top:8px" href="${waLink(r.c)}" target="_blank" rel="noopener">WhatsApp öffnen</a></div>`;
+  }).join('');
+  const call=callTarget?(callOk?`<div class="status ok"><b>${esc(callTarget.name)}</b> wird angerufen.</div>`
+    :`<div class="status wait"><div><b>${esc(callTarget.name)}</b> anrufen: <span class="num">${esc(callTarget.num)}</span></div><a class="btn danger wide" style="margin-top:8px" href="tel:${esc(callTarget.num.replace(/[^\d+]/g,''))}">Jetzt anrufen</a></div>`):'';
+  box.innerHTML=`<h1>${v('Hilfe ist unterwegs. Bleib bei mir.','Deine Vertrauenspersonen werden informiert.','Ihre Vertrauenspersonen werden informiert.')}</h1>
+    ${rows}${call}
+    ${!NATIVE?`<p class="small muted">Im Browser kann Anker nicht selbst senden. In der Android-App passiert das automatisch.</p>`:''}
+    <details class="card"><summary>Diese Nachricht wird verschickt</summary><p class="small">${esc(ALARM.msg)}</p></details>
+    <div class="card"><h3>Bei Lebensgefahr</h3>${hotlinesHTML()}</div>
+    <button class="soft" data-a="ex" data-v="atem">${v('Mit mir atmen, bis jemand da ist','Atemübung, während du wartest','Atemübung, während Sie warten')}</button>
+    <button class="ghost" data-a="all-clear">Entwarnung senden: Mir geht es besser</button>`;
+}
+async function allClear(){
+  const msg=`Hier ist ${S.name||'ich'}. Entwarnung: Mir geht es wieder etwas besser. Danke, dass du da bist. (Anker)`;
+  const box=$('#alarmbox');const out=[];
+  for(const c of S.contacts){
+    if(c.how==='wa'){out.push(`<a class="btn soft wide" href="${waLink(c,msg)}" target="_blank" rel="noopener">WhatsApp an ${esc(c.name)}</a>`);continue}
+    let ok=false;if(NATIVE){try{ok=AnkerNative.sendSms(c.num,msg)}catch(e){}}
+    out.push(ok?`<div class="status ok">Entwarnung an <b>${esc(c.name)}</b> gesendet.</div>`:`<a class="btn soft wide" href="${smsLink(c,msg)}">Entwarnung per SMS an ${esc(c.name)}</a>`);
+  }
+  box.innerHTML=`<h1>${v('Schön, dass es dir besser geht.','Gut, dass es dir besser geht.','Gut, dass es Ihnen besser geht.')}</h1>${out.join('')}<button data-a="home">Zur Startseite</button>`;
+}
+
+/* ---- Notfallplan ---- */
+VIEWS.plan=()=>{
+  if(V.edit)return `${topbar('Notfallplan')}<div class="stack">${planForm()}<button data-a="plan-save">Speichern</button></div>`;
+  const p=S.plan,sec=(t,x)=>`<div class="card"><h3>${t}</h3><p class="${x?'':'muted'}">${x?esc(x).replace(/\n/g,'<br>'):'Noch nichts eingetragen.'}</p></div>`;
+  return `${topbar('Notfallplan')}
+  ${sec('Meine Warnzeichen',p.signs)}${sec('Was mir hilft',p.helps)}
+  <div class="card"><h3>Wer mir hilft</h3>${S.contacts.length?contactCallList():'<p class="muted">Noch niemand eingetragen.</p>'}</div>
+  ${sec('Mein sicherer Ort',p.safe)}${sec('Wofür es sich lohnt',p.reasons)}
+  <div class="card"><h3>Profis</h3>${hotlinesHTML()}</div>
+  <button class="soft" data-a="plan-edit">Bearbeiten</button>`;
+};
+
+/* ---- Skills ---- */
+const SKILLS={
+ 'Ablenken':['Lieblingslied laut mitsingen','Ein Rätsel oder Sudoku lösen','Von 100 rückwärts zählen','Einen Gegenstand ganz genau beschreiben','Alle blauen Dinge im Raum zählen','Eine Folge der Lieblingsserie schauen'],
+ 'Beruhigen':['An etwas Gutem riechen (Tee, Seife, Parfum)','Kaugummi kauen','In eine weiche Decke kuscheln','Etwas Warmes trinken','Ein Haustier streicheln','An den sicheren Ort denken'],
+ 'Bewegen':['10 Minuten rausgehen','20 Hampelmänner','Treppe rauf und runter laufen','Zu einem Lied tanzen','Einen Ball gegen die Wand werfen'],
+ 'Kontakt':['Jemandem eine Nachricht schreiben','Eine Sprachnachricht schicken','Mit jemandem zusammen rausgehen']
+};
+function allSkills(){const a=[];for(const c in SKILLS)SKILLS[c].forEach(t=>a.push({c,t}));S.skillOwn.forEach(t=>a.push({c:'Eigene',t,own:true}));return a}
+VIEWS.skills=()=>{
+  const all=allSkills(),cats=[...new Set(all.map(s=>s.c))];
+  const fav=all.filter(s=>S.skillFav.includes(s.t));
+  const row=s=>`<div class="skill"><button class="star ${S.skillFav.includes(s.t)?'on':''}" data-a="fav" data-v="${esc(s.t)}" aria-label="Favorit">★</button><span>${esc(s.t)}</span>${s.own?`<button class="iconbtn" data-a="del-skill" data-v="${esc(s.t)}">Löschen</button>`:''}</div>`;
+  return `${topbar('Skills-Box')}
+  <p class="muted">${v('Markier mit dem Stern, was dir hilft. Das schlag ich dir dann in schweren Momenten zuerst vor.','Markiere mit dem Stern, was dir hilft. Diese Skills schlägt Anker in schweren Momenten zuerst vor.','Markieren Sie mit dem Stern, was Ihnen hilft. Diese Skills schlägt Anker in schweren Momenten zuerst vor.')}</p>
+  ${fav.length?`<div class="card"><h3>Meine Favoriten</h3>${fav.map(row).join('')}</div>`:''}
+  <div class="card"><h3>Eigenen Skill hinzufügen</h3><form class="row" data-f="skill"><input id="s-new" placeholder="z. B. Mit Oma telefonieren" style="flex:1;min-width:0"><button type="submit">Hinzufügen</button></form></div>
+  ${cats.map(c=>`<div class="card"><h3>${c}</h3>${all.filter(s=>s.c===c).map(row).join('')}</div>`).join('')}`;
+};
+
+/* ---- Tagebuch ---- */
+const WHAT={panik:'Panik',gedanken:'Gedankenkreisen',wut:'Wut/Anspannung',leere:'Leere',krise:'Krisengedanken',anders:'Anderes',notiz:'Eintrag'};
+VIEWS.diary=()=>{
+  const d=S.diary;
+  const last=d.filter(e=>e.before!=null).slice(0,10).reverse();
+  let chart='';
+  if(last.length){const W=Math.max(320,last.length*44),Hh=160,bw=14,sc=n=>Hh-20-(n/10)*(Hh-40);
+    chart=`<div class="chart"><svg width="${W}" height="${Hh}" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Stärke vorher und nachher">
+    ${[0,5,10].map(n=>`<line x1="24" x2="${W}" y1="${sc(n)}" y2="${sc(n)}" stroke="var(--line)"/><text x="0" y="${sc(n)+4}" font-size="11" fill="var(--muted)">${n}</text>`).join('')}
+    ${last.map((e,i)=>{const x=34+i*44;const a=e.after??e.before;return `<rect x="${x}" y="${sc(e.before)}" width="${bw}" height="${Hh-20-sc(e.before)}" rx="3" fill="var(--alarm)" opacity=".75"/><rect x="${x+bw+2}" y="${sc(a)}" width="${bw}" height="${Hh-20-sc(a)}" rx="3" fill="var(--ok)"/><text x="${x+bw}" y="${Hh-4}" font-size="10" text-anchor="middle" fill="var(--muted)">${new Date(e.t).getDate()}.${new Date(e.t).getMonth()+1}</text>`}).join('')}
+    </svg></div><div class="row small"><span><span style="display:inline-block;width:10px;height:10px;background:var(--alarm);border-radius:2px"></span> vorher</span><span><span style="display:inline-block;width:10px;height:10px;background:var(--ok);border-radius:2px"></span> nachher</span></div>`;}
+  const better=d.filter(e=>e.after!=null&&e.after<e.before).length;
+  return `${topbar('Tagebuch')}
+  ${d.length?`<div class="card"><h3>Deine letzten Momente</h3>${chart}<p class="small muted">${better} von ${d.filter(e=>e.after!=null).length} Mal ging es nach den Übungen besser.</p></div>`:''}
+  <div class="card"><h3>Neuer Eintrag</h3>
+    <div class="field"><label for="d-lvl">Wie geht es dir gerade? (0 bis 10)</label><input id="d-lvl" type="range" min="0" max="10" value="5" oninput="this.nextElementSibling.textContent=this.value+' von 10'"><span class="small muted">5 von 10</span></div>
+    <div class="field"><label for="d-note">Was ist passiert? Was hat geholfen?</label><textarea id="d-note"></textarea></div>
+    <button class="soft" data-a="diary-add">Speichern</button></div>
+  <div class="card">${d.length?d.slice(0,50).map(e=>`<div class="entry"><b>${fmtDate(e.t)}</b><span class="small">${WHAT[e.what]||''} ${e.before!=null?`· ${e.before}${e.after!=null?' → '+e.after:''} von 10`:''}${e.alarm?' · <span class="pill">Alarm</span>':''}</span>${e.note?`<span class="small muted">${esc(e.note)}</span>`:''}</div>`).join(''):'<p class="muted">Noch keine Einträge. Jedes Mal, wenn du den Hilfe-Knopf nutzt, entsteht hier automatisch ein Eintrag. Das hilft dir und deiner Therapeutin oder deinem Arzt, Muster zu erkennen.</p>'}</div>`;
+};
+
+/* ---- Kleine Schritte ---- */
+function stepList(){
+  const base=S.age==='kind'?['Einem anderen Kind Hallo sagen','Im Unterricht einmal aufzeigen','In der Pause jemanden fragen, ob ich mitspielen darf','Beim Bäcker selbst bestellen','Jemandem etwas Nettes sagen']
+   :S.age==='jugend'?['Jemandem aus der Klasse Hallo sagen','Im Unterricht einmal etwas sagen','Einer Person eine Nachricht schreiben','Beim Bäcker selbst bestellen','10 Minuten an einem Ort mit Menschen sein','Jemandem ein Kompliment machen']
+   :['Einer Person im Haus Hallo sagen','Beim Bäcker oder an der Kasse kurz plaudern','Einer Person eine Nachricht schreiben','10 Minuten an einem Ort mit Menschen sein (Park, Café)','Jemandem eine Frage stellen','Einen Termin selbst telefonisch machen'];
+  return base.concat(S.stepsOwn);
+}
+VIEWS.steps=()=>{
+  const l=stepList(),done=l.filter(t=>S.stepsDone[t]).length;
+  return `${topbar('Kleine Schritte')}
+  <p class="muted">${v('Kleine Mutproben, ganz ohne Druck. Jeder Haken zählt, auch wenn\'s nur einer pro Woche ist.','Kleine Übungen für mehr Sicherheit unter Menschen. Wähle selbst, was heute passt. Es gibt keinen Druck.','Kleine Übungen für mehr Sicherheit unter Menschen. Wählen Sie selbst, was heute passt. Es gibt keinen Druck.')}</p>
+  ${done?`<div class="note">${v(`Du hast schon ${done} Schritt${done>1?'e':''} geschafft. Echt stark!`,`Du hast ${done} Schritt${done>1?'e':''} geschafft.`,`Sie haben ${done} Schritt${done>1?'e':''} geschafft.`)}</div>`:''}
+  <div class="card">${l.map((t,i)=>`<label class="check"><input type="checkbox" data-a="step" data-v="${esc(t)}" ${S.stepsDone[t]?'checked':''}><span style="flex:1">${esc(t)}</span>${S.stepsOwn.includes(t)?`<button class="iconbtn" data-a="del-step" data-v="${esc(t)}">Löschen</button>`:''}</label>`).join('')}</div>
+  <div class="card"><h3>Eigenen Schritt hinzufügen</h3><form class="row" data-f="step"><input id="st-new" placeholder="z. B. Im Verein vorbeischauen" style="flex:1;min-width:0"><button type="submit">Hinzufügen</button></form></div>
+  ${done?`<button class="ghost" data-a="steps-reset">Neu anfangen (alle Haken entfernen)</button>`:''}`;
+};
+
+/* ---- Einstellungen ---- */
+VIEWS.settings=()=>`${topbar('Einstellungen')}
+  <div class="card"><div class="field"><label for="f-name">Name</label><input id="f-name" value="${esc(S.name)}"></div>
+  <label>Alter</label><select id="f-age">${[['kind','Kind (bis 12)'],['jugend','Jugendlich (13 bis 17)'],['erw','Erwachsen (ab 18)']].map(([k,t])=>`<option value="${k}" ${S.age===k?'selected':''}>${t}</option>`).join('')}</select>
+  <button class="soft" data-a="save-basic">Speichern</button></div>
+  <h2>Wie spricht Anker mit dir?</h2>
+  <button class="choicecard ${S.tone==='kumpel'?'on':''}" data-a="tone2" data-v="kumpel"><b>Wie ein Kumpel</b><span>Locker und persönlich</span></button>
+  <button class="choicecard ${S.tone==='profi'?'on':''}" data-a="tone2" data-v="profi"><b>Professionell</b><span>Ruhig und sachlich${S.age==='erw'?', mit „Sie“':''}</span></button>
+  <h2>Vertrauenspersonen</h2>${contactsEditor()}
+  <div class="card"><h3>Alarm testen</h3><p class="small muted">Zeigt die Nachricht, ohne etwas zu senden.</p><p class="small quote" id="testmsg" hidden></p><button class="ghost" data-a="test-alarm">Nachricht anzeigen</button>
+  <p class="small">Automatisches Senden: <b>${NATIVE?'aktiv (Android-App)':'nicht verfügbar (Browser), du tippst noch auf Senden'}</b></p>
+  ${NATIVE?`<button class="ghost" data-a="perms">Berechtigungen prüfen</button>`:''}</div>
+  <div class="card"><h3>Daten</h3><p class="small muted">Alle Daten liegen nur auf diesem Gerät.</p>
+  <div id="wipe"><button class="ghost" data-a="wipe-ask">Alle Daten löschen</button></div></div>`;
+
+/* ============ Rendern & Aktionen ============ */
+function render(){
+  app.innerHTML=(VIEWS[V.name]||VIEWS.home)();
+  if(V.name==='help')helpFlow();
+  if(V.name==='ex')runSingle();
+  if(V.name==='alarm')startAlarm();
+}
+function addContact(){
+  const n=$('#c-name').value.trim(),num=$('#c-num').value.trim(),how=$('#c-how').value,err=$('#c-err');
+  const digits=num.replace(/\D/g,'');
+  if(!n||digits.length<5){err.textContent=!n?'Bitte gib einen Namen ein.':'Bitte gib eine gültige Telefonnummer ein.';err.hidden=false;return}
+  S.contacts.push({name:n,num,how});save();render();
+}
+function act(a,d,e){
+  switch(a){
+    case 'home':return go('home');
+    case 'go':return go(d.v);
+    case 'help':return go('help');
+    case 'ex':return go('ex',{ex:d.v});
+    case 'setup-next':
+      if(V.step===1){S.name=$('#f-name').value.trim()}
+      if(V.step===5)readPlan();
+      save();V.step=(V.step||0)+1;return render();
+    case 'setup-skip':V.step++;return render();
+    case 'setup-back':if(V.step===5)readPlan();V.step--;return render();
+    case 'setup-done':S.setup=true;save();return go('home');
+    case 'set-age':S.age=d.v;if(d.v==='kind')S.tone='kumpel';save();return render();
+    case 'set-tone':S.tone=d.v;save();return render();
+    case 'tone2':S.tone=d.v;save();return render();
+    case 'add-contact':return addContact();
+    case 'del-contact':S.contacts.splice(+d.i,1);save();return render();
+    case 'toggle-loc':S.loc=e.checked;save();return;
+    case 'plan-edit':V.edit=true;return render();
+    case 'plan-save':readPlan();V.edit=false;return render();
+    case 'fav':{const i=S.skillFav.indexOf(d.v);if(i>=0)S.skillFav.splice(i,1);else S.skillFav.push(d.v);save();return render()}
+    case 'del-skill':S.skillOwn=S.skillOwn.filter(t=>t!==d.v);S.skillFav=S.skillFav.filter(t=>t!==d.v);save();return render();
+    case 'step':S.stepsDone[d.v]=e.checked;save();return render();
+    case 'del-step':S.stepsOwn=S.stepsOwn.filter(t=>t!==d.v);delete S.stepsDone[d.v];save();return render();
+    case 'steps-reset':S.stepsDone={};save();return render();
+    case 'diary-add':{const n=+$('#d-lvl').value,t=$('#d-note').value.trim();S.diary.unshift({t:Date.now(),before:n,after:null,what:'notiz',ex:[],note:t});save();return render()}
+    case 'alarm-cancel':return cancelAlarm();
+    case 'alarm-now':clearInterval(ALARM.id);return fireAlarm();
+    case 'all-clear':return allClear();
+    case 'save-basic':S.name=$('#f-name').value.trim();S.age=$('#f-age').value;save();return render();
+    case 'test-alarm':{const m=$('#testmsg');m.textContent=alarmText(S.loc?'(Link zu deinem Standort)':'');m.hidden=false;return}
+    case 'perms':try{AnkerNative.requestPermissions()}catch(x){}return;
+    case 'wipe-ask':$('#wipe').innerHTML=`<p><b>Wirklich alles löschen?</b> Kontakte, Notfallplan und Tagebuch sind dann weg.</p><div class="row"><button class="danger" data-a="wipe">Ja, löschen</button><button class="ghost" data-a="go" data-v="settings">Abbrechen</button></div>`;return;
+    case 'wipe':S=clone(DEF);save();return go('setup',{step:0});
+  }
+}
+app.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.tagName==='INPUT')return;act(b.dataset.a,b.dataset,b)});
+app.addEventListener('change',e=>{const b=e.target.closest('input[data-a]');if(b)act(b.dataset.a,b.dataset,b)});
+app.addEventListener('submit',e=>{const f=e.target.closest('form[data-f]');if(!f||!['skill','step'].includes(f.dataset.f))return;e.preventDefault();
+  if(f.dataset.f==='skill'){const t=$('#s-new').value.trim();if(t&&!S.skillOwn.includes(t)){S.skillOwn.push(t);S.skillFav.push(t);save()}render()}
+  if(f.dataset.f==='step'){const t=$('#st-new').value.trim();if(t&&!S.stepsOwn.includes(t)){S.stepsOwn.push(t);save()}render()}});
+render();
+</script>
