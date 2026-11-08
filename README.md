@@ -2,8 +2,8 @@
 
 Hilfe-App für Kinder, Jugendliche und Erwachsene bei Panik, Anspannung und Leere. Mit geführtem Dialog, Übungen, Notfallplan und automatischem Notfall-Alarm an Vertrauenspersonen.
 
-- **Android-App herunterladen:** https://github.com/robertpahl1987-creator/anker-app/releases/latest
-- **Im Browser ausprobieren:** https://robertpahl1987-creator.github.io/anker-app/
+- **Android-App herunterladen:** https://github.com/anker-hilfe/anker-app/releases/latest
+- **Im Browser ausprobieren:** https://anker-hilfe.github.io/anker-app/
 
 > Anker ersetzt keine Therapie und keine ärztliche Hilfe. Bei Lebensgefahr: **112**. TelefonSeelsorge: **0800 111 0 111**. Nummer gegen Kummer (Kinder & Jugendliche): **116 111**.
 
