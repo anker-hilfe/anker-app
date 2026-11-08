@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="hilfe"
+        android:enabled="true"
+        android:icon="@drawable/ic_anker"
+        android:shortcutShortLabel="@string/sc_help_short"
+        android:shortcutLongLabel="@string/sc_help_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="anker://hilfe"
+            android:targetPackage="de.anker.app"
+            android:targetClass="de.anker.app.MainActivity"/>
+    </shortcut>
+    <shortcut
+        android:shortcutId="zeigen"
+        android:enabled="true"
+        android:icon="@drawable/ic_anker"
+        android:shortcutShortLabel="@string/sc_card_short"
+        android:shortcutLongLabel="@string/sc_card_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="anker://zeigen"
+            android:targetPackage="de.anker.app"
+            android:targetClass="de.anker.app.MainActivity"/>
+    </shortcut>
+</shortcuts>

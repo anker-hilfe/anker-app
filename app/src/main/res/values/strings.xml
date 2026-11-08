@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Anker</string>
+    <string name="app_name_discreet">Notizen</string>
+    <string name="widget_desc">Ein Tipp öffnet sofort die Hilfe</string>
+    <string name="sc_help_short">Hilfe jetzt</string>
+    <string name="sc_help_long">Ich brauche jetzt Hilfe</string>
+    <string name="sc_card_short">Karte zeigen</string>
+    <string name="sc_card_long">Zeig das jemandem</string>
+</resources>

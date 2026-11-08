@@ -7,6 +7,19 @@ Hilfe-App für Kinder, Jugendliche und Erwachsene bei Panik, Anspannung und Leer
 
 > Anker ersetzt keine Therapie und keine ärztliche Hilfe. Bei Lebensgefahr: **112**. TelefonSeelsorge: **0800 111 0 111**. Nummer gegen Kummer (Kinder & Jugendliche): **116 111**.
 
+## Funktionen
+
+- Hilfe-Dialog bei Panik, Gedankenkreisen, Wut oder Leere mit passenden Übungen
+- Atmen mit Vibration (Pulsieren = einatmen) und Vorlesen
+- Karte „Zeig das jemandem“ für Fremde (Deutsch und Englisch)
+- Notfall-Alarm bei 10 von 10 und Melde-dich-Timer (SMS, Anruf, WhatsApp)
+- Täglicher Kurz-Check mit Hinweis, wenn es mehrere Tage schlecht geht
+- Notfallplan, Skills-Box, Tagebuch, Bericht als PDF für Therapie und Arzt
+- Gesprächs-Training, Gedanken-Check, Kleine Schritte
+- Infoseiten für Vertrauenspersonen und Eltern
+- Sprachen für die Notfallhilfe: Deutsch, Englisch, Türkisch, Arabisch, Ukrainisch
+- PIN-Schutz und diskreter Modus („Notizen“), Widget und Schnellstart (Android)
+
 ---
 
 ## Selbst bauen
