@@ -1,5 +1,5 @@
 // Anker: hält die App offline verfügbar, damit sie auch ohne Internet funktioniert.
-const CACHE = 'anker-v4';
+const CACHE = 'anker-v5';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

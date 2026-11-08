@@ -19,6 +19,7 @@ Hilfe-App für Kinder, Jugendliche und Erwachsene bei Panik, Anspannung und Leer
 - Gesprächs-Training, Gedanken-Check, Kleine Schritte
 - Infoseiten für Vertrauenspersonen und Eltern
 - Sprachen für die Notfallhilfe: Deutsch, Englisch, Türkisch, Arabisch, Ukrainisch
+- „Was ist neu?“-Hinweis nach jedem Update (neue Einträge oben in `CHANGELOG` in index.html)
 - PIN-Schutz und diskreter Modus („Notizen“), Widget und Schnellstart (Android)
 
 ---

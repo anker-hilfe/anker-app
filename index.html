@@ -110,6 +110,7 @@ textarea{min-height:84px;resize:vertical}
 .lrow .end{color:var(--muted);font-size:1.3rem;flex:none}
 .lrow .unl{color:var(--ok);font-weight:600;font-size:.85rem}
 .lrow .meter{margin:0}
+.lrow.news{display:flex;align-items:flex-start;cursor:default}.lrow.news>svg{margin-top:2px}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:center;gap:4px;background:var(--surface);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px))}
 .tabbar button{flex:1;max-width:170px;background:transparent;color:var(--muted);flex-direction:column;gap:2px;padding:6px 4px;min-height:56px;font-size:.8rem;border-radius:12px}
 .tabbar button svg{width:24px;height:24px}
@@ -197,7 +198,7 @@ const DEF={setup:false,lang:'de',name:'',age:'erw',tone:'kumpel',contacts:[],loc
   plan:{signs:'',helps:'',safe:'',reasons:''},
   skillFav:[],skillOwn:[],stepsOwn:[],stepsDone:{},diary:[],
   voice:false,vib:true,checks:[],timer:null,pin:'',discreet:false,remind:false,remindHour:20,cardText:'',
-  practice:{},drawer:[],dreamKind:'',dreamPlace:''};
+  practice:{},drawer:[],dreamKind:'',dreamPlace:'',seenVersion:''};
 function clone(o){return JSON.parse(JSON.stringify(o))}
 function load(){try{const r=localStorage.getItem(KEY);if(r)return Object.assign(clone(DEF),JSON.parse(r))}catch(e){}return clone(DEF)}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
@@ -430,7 +431,7 @@ function go(name,params={}){
   if(name==='home'&&!S.setup)name='setup';
   if(S.pin&&!UNLOCKED&&!OPEN_WHEN_LOCKED.includes(name)){params={next:name};name='lock'}
   GEN++;clearTimers();stopSpeak();keepAwake(false);V=Object.assign({name},params);render();window.scrollTo(0,0)}
-window.ankerBack=function(){if(V.name==='home'&&HOMETAB!=='hilfe'){HOMETAB='hilfe';render();return 'true'}if(V.name==='home'||V.name==='setup'||V.name==='lock')return 'false';if(V.name==='alarm'&&V.phase==='count'){cancelAlarm();return 'true'}go('home');return 'true'};
+window.ankerBack=function(){if(V.name==='news'&&!V.all){S.seenVersion=APP_VERSION;save()}if(V.name==='home'&&HOMETAB!=='hilfe'){HOMETAB='hilfe';render();return 'true'}if(V.name==='home'||V.name==='setup'||V.name==='lock')return 'false';if(V.name==='alarm'&&V.phase==='count'){cancelAlarm();return 'true'}go('home');return 'true'};
 window.ankerLaunch=function(w){if(w==='hilfe')go(S.setup?'help':'setup');else if(w==='check'||w==='')go('home');else if(w==='zeigen')go('card');else if(w==='helfer')go('helfer')};
 
 function topbar(title,back=true){
@@ -523,6 +524,28 @@ function trendCard(){
    <button class="soft" data-a="help">${t('sosTitle')}</button>${S.lang==='de'?TERMIN_HINT:''}</div>`;
 }
 
+/* ---- Was ist neu? Neue Einträge immer OBEN anfügen und APP_VERSION erhöhen ---- */
+const CHANGELOG=[
+ {v:'1.3',d:'08.11.2026',title:'Übersichtlicher und neue Übungen',items:[
+   [ICON.anchor,'Neue Startseite','Unten gibt es jetzt drei Reiter: <b>Hilfe</b>, <b>Üben</b> und <b>Mein Plan</b>. So findest du alles schneller.'],
+   [ICON.drawer,'Meine Schublade','Leg belastende Gedanken in eine Schublade und hol sie später wieder raus, wenn du Kraft hast.'],
+   [ICON.sun,'Traumreise','Eine ruhige Fantasiereise an deinen sicheren Ort, zum Beispiel Strand, Wald oder einen eigenen Ort.'],
+   [ICON.image,'Bilderraten','Ein Bild wird langsam scharf. Rate, was es ist, und hol deine Aufmerksamkeit ins Hier und Jetzt.'],
+   [ICON.plan,'Erst üben, dann im Notfall','Hast du eine dieser Übungen 3-mal gemacht, schlägt Anker sie dir auch in schweren Momenten vor.']]},
+ {v:'1.2',d:'08.11.2026',title:'Schneller Zugriff',items:[
+   [ICON.anchor,'Widget und Schnellstart','Starte die Hilfe direkt vom Startbildschirm deines Handys (Android).'],
+   [ICON.clock,'Erinnerung','Auf Wunsch erinnert dich Anker täglich an den Kurz-Check.']]}];
+const APP_VERSION=CHANGELOG[0].v;
+function needNews(){return S.setup&&S.seenVersion!==APP_VERSION}
+function newsEntries(all){if(all)return CHANGELOG;const i=CHANGELOG.findIndex(c=>c.v===S.seenVersion);return i<0?CHANGELOG.slice(0,1):CHANGELOG.slice(0,i)}
+VIEWS.news=()=>{
+  const all=!!V.all,list=newsEntries(all);
+  return `${all?topbar('Was ist neu?'):`<div class="top"><div class="brand">${ICON.anchor}${S.discreet?'':'Anker'}</div><span class="pill">Version ${APP_VERSION}</span></div>`}
+  ${all?'':`<div class="stack"><h1>${v('Hey'+(S.name?' '+nm():'')+', es gibt was Neues!','Neu in Anker','Neu in Anker')}</h1><p class="muted">${v('Das hat sich seit deinem letzten Besuch geändert:','Das hat sich seit dem letzten Update geändert:','Das hat sich seit dem letzten Update geändert:')}</p></div>`}
+  ${list.map(c=>`<section class="stack"><div><h2 class="sect">${esc(c.title)}</h2><p class="small muted">Version ${c.v} · ${c.d}</p></div>
+    <div class="list">${c.items.map(([ic,tt,tx])=>`<div class="lrow news">${ic}<span class="lt"><b>${tt}</b><span class="sub">${tx}</span></span></div>`).join('')}</div></section>`).join('')}
+  ${all?'':`<button class="wide" data-a="news-ok">${v("Alles klar, los geht's",'Weiter zur App','Weiter zur App')}</button>`}`;
+};
 /* ---- Start ---- */
 let HOMETAB='hilfe';
 function lrow(a,vv,icon,title,sub,end){return `<button class="lrow" data-a="${a}" ${vv?`data-v="${vv}"`:''}>${icon}<span class="lt"><b>${title}</b>${sub?`<span class="sub">${sub}</span>`:''}</span><span class="end">${end??'›'}</span></button>`}
@@ -1289,7 +1312,7 @@ VIEWS.settings=()=>`${topbar('Einstellungen')}
     :`<div class="row"><input id="f-pin" type="password" inputmode="numeric" maxlength="4" placeholder="4 Ziffern" style="flex:1;min-width:0" autocomplete="off"><button class="soft" data-a="pin-on">PIN setzen</button></div><p id="pin-msg" class="small" style="color:var(--alarm)" hidden>Bitte genau 4 Ziffern eingeben.</p>`}
    <label class="toggle"><input type="checkbox" data-a="set-discreet" ${S.discreet?'checked':''}> Diskreter Modus: neutraler Name „Notizen“ ${NATIVE?'und neutrales Symbol auf dem Startbildschirm':'im Browser-Tab'}</label>
    ${S.discreet&&NATIVE?'<p class="small muted">Das Symbol auf dem Startbildschirm ändert sich nach ein paar Sekunden. Eine Verknüpfung oder ein Widget musst du eventuell neu anlegen.</p>':''}</div>
-  <div class="card"><h3>Weitere Infos</h3><button class="ghost" data-a="go" data-v="helfer">Seite für Vertrauenspersonen ansehen</button>${minor()?'<button class="ghost" data-a="go" data-v="eltern">Seite für Eltern ansehen</button>':''}</div>
+  <div class="card"><h3>Weitere Infos</h3><button class="ghost" data-a="news-all">Was ist neu? (Version ${APP_VERSION})</button><button class="ghost" data-a="go" data-v="helfer">Seite für Vertrauenspersonen ansehen</button>${minor()?'<button class="ghost" data-a="go" data-v="eltern">Seite für Eltern ansehen</button>':''}</div>
   <div class="card"><h3>Alarm testen</h3><p class="small muted">Zeigt die Nachricht, ohne etwas zu senden.</p><p class="small quote" id="testmsg" hidden></p><button class="ghost" data-a="test-alarm">Nachricht anzeigen</button>
   <p class="small">Automatisches Senden: <b>${NATIVE?'aktiv (Android-App)':'nicht verfügbar (Browser), du tippst noch auf Senden'}</b></p>
   ${NATIVE?`<button class="ghost" data-a="perms">Berechtigungen prüfen</button>`:''}</div>
@@ -1314,6 +1337,8 @@ function addContact(){
 function act(a,d,e){
   switch(a){
     case 'home':return go('home');
+    case 'news-all':return go('news',{all:true});
+    case 'news-ok':S.seenVersion=APP_VERSION;save();return go('home');
     case 'tab':HOMETAB=d.v;render();return window.scrollTo(0,0);
     case 'go':return go(d.v);
     case 'help':return go(S.setup?'help':'setup');
@@ -1326,7 +1351,7 @@ function act(a,d,e){
       save();V.step=(V.step||0)+1;return render();
     case 'setup-skip':V.step++;return render();
     case 'setup-back':if(V.step===6)readPlan();V.step--;return render();
-    case 'setup-done':HOMETAB='hilfe';S.setup=true;save();return go('home');
+    case 'setup-done':HOMETAB='hilfe';S.seenVersion=APP_VERSION;S.setup=true;save();return go('home');
     case 'set-age':S.age=d.v;if(d.v==='kind')S.tone='kumpel';save();return render();
     case 'set-tone':case 'tone2':S.tone=d.v;save();return render();
     case 'add-contact':return addContact();
@@ -1393,8 +1418,8 @@ app.addEventListener('submit',e=>{const f=e.target.closest('form[data-f]');if(!f
   if(launch==='hilfe'){V={name:'help'};render();return}
   if(launch==='zeigen'){V={name:'card'};render();return}
   if(S.timer&&!NATIVE&&Date.now()>=S.timer.until){checkTimer();return}
-  if(S.pin){V={name:'lock',next:'home'};render();return}
-  V={name:'home'};render();
+  if(S.pin){V={name:'lock',next:needNews()?'news':'home'};render();return}
+  V={name:needNews()?'news':'home'};render();
 })();
 window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(['hilfe','helfer','zeigen'].includes(h))ankerLaunch(h)});
 if('serviceWorker' in navigator && location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}
