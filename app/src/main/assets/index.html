@@ -98,6 +98,37 @@ textarea{min-height:84px;resize:vertical}
 .chips{display:flex;flex-wrap:wrap;gap:6px}.chips span{background:var(--accent-soft);padding:4px 10px;border-radius:99px;font-size:.9rem}
 .dots{display:flex;gap:8px}.dots i{width:14px;height:14px;border-radius:50%;background:var(--line)}.dots i.on{background:var(--accent)}
 .big{font-family:var(--f-display);font-size:3rem;font-weight:600;font-variant-numeric:tabular-nums;text-align:center;direction:ltr}
+/* Üben zu Hause */
+.sechead{display:flex;flex-direction:column;gap:4px;margin-top:4px}
+.tile .unl{color:var(--ok);font-weight:600}
+.meter{display:flex;gap:4px;margin-top:4px}.meter i{width:18px;height:6px;border-radius:3px;background:var(--line)}.meter i.on{background:var(--ok)}
+/* Schublade */
+.cabwrap{position:relative;height:236px;width:100%;max-width:280px;margin:0 auto}
+.cab{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:210px;height:140px;background:var(--sand);border-radius:14px;box-shadow:inset 0 -6px 0 rgba(0,0,0,.08)}
+.cab .tray{position:absolute;left:16px;right:16px;top:28px;height:44px;border-radius:6px;background:var(--sand-ink);opacity:0;transition:opacity .6s}
+.cab .front{position:absolute;left:16px;right:16px;top:28px;height:62px;border-radius:10px;background:var(--surface);border:2px solid var(--line);display:grid;place-items:center;transition:transform .9s ease-in-out;z-index:2}
+.cab .front .knob{width:44px;height:10px;border-radius:5px;background:var(--line);transition:opacity .4s}
+.cab .front .lk{position:absolute;opacity:0;transition:opacity .5s;color:var(--accent)}
+.cab .front .lk svg{width:30px;height:30px}
+.cabwrap.open .tray{opacity:.25}.cabwrap.open .front{transform:translateY(46px) scale(1.06)}
+.cabwrap.locked .knob{opacity:0}.cabwrap.locked .lk{opacity:1}
+.cabwrap .paper{position:absolute;left:50%;top:0;width:170px;transform:translateX(-50%) rotate(-3deg);background:#FFFDF6;color:#3A3324;border-radius:6px;padding:10px 12px;font-size:.9rem;line-height:1.3;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:top 1.2s ease-in,transform 1.2s ease-in,opacity .5s ease-in .9s;z-index:1;overflow-wrap:anywhere}
+.cabwrap.in .paper{top:122px;transform:translateX(-50%) rotate(0) scale(.4);opacity:0}
+.say{min-height:3em;text-align:center}
+/* Traumreise */
+.dream{display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
+.dream .sun{width:150px;height:150px;border-radius:50%;background:radial-gradient(circle at 50% 50%,var(--sand) 0%,var(--accent-soft) 55%,transparent 72%);animation:glow 8s ease-in-out infinite}
+@keyframes glow{0%,100%{transform:scale(.9);opacity:.8}50%{transform:scale(1.08);opacity:1}}
+@media (prefers-reduced-motion:reduce){.dream .sun{animation:none}.cab .front,.cabwrap .paper{transition:none}}
+.dream p.txt{font-size:1.15rem;line-height:1.6;min-height:6.5em;transition:opacity .6s}
+.bar{width:100%;height:6px;border-radius:3px;background:var(--line);overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width 1s linear}
+/* Bilderraten */
+.pic{width:180px;height:180px;margin:0 auto;border-radius:var(--r);background:var(--bg);display:grid;place-items:center;overflow:hidden}
+.pic span{font-size:110px;line-height:1;transition:filter 1.3s linear;user-select:none}
+.guess{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.guess button{background:var(--surface);color:var(--ink);border:2px solid var(--line)}
+.guess button.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,var(--surface))}
+.guess button.no{opacity:.45}
 .alarmring{width:200px;height:200px;border-radius:50%;margin:0 auto;display:grid;place-items:center;background:conic-gradient(var(--alarm) var(--p,100%),var(--alarm-soft) 0)}
 .alarmring div{width:160px;height:160px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-family:var(--f-display);font-size:3.4rem;font-weight:600;color:var(--alarm)}
 .cancel{min-height:84px;font-size:1.3rem;background:var(--ink);color:var(--bg)}
@@ -147,7 +178,8 @@ const KEY='anker_v1';
 const DEF={setup:false,lang:'de',name:'',age:'erw',tone:'kumpel',contacts:[],loc:true,
   plan:{signs:'',helps:'',safe:'',reasons:''},
   skillFav:[],skillOwn:[],stepsOwn:[],stepsDone:{},diary:[],
-  voice:false,vib:true,checks:[],timer:null,pin:'',discreet:false,remind:false,remindHour:20,cardText:''};
+  voice:false,vib:true,checks:[],timer:null,pin:'',discreet:false,remind:false,remindHour:20,cardText:'',
+  practice:{},drawer:[],dreamKind:'',dreamPlace:''};
 function clone(o){return JSON.parse(JSON.stringify(o))}
 function load(){try{const r=localStorage.getItem(KEY);if(r)return Object.assign(clone(DEF),JSON.parse(r))}catch(e){}return clone(DEF)}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
@@ -354,6 +386,10 @@ const ICON={
  talk:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h11v8H8l-4 3z"/><path d="M15 9h5v8l-3-2h-6v-2"/></svg>',
  bulb:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></svg>',
  chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-6"/></svg>',
+ drawer:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 12h18M10 8h4M10 16h4"/></svg>',
+ sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18h20M5 18a7 7 0 0 1 14 0"/><path d="M12 5V3M5.6 8.6 4.2 7.2M18.4 8.6l1.4-1.4M7 21h10"/></svg>',
+ image:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>',
+ lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
  phone:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2"/></svg>',
  gear:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>'
 };
@@ -493,6 +529,7 @@ VIEWS.home=()=>{
     ${tile('go','report',ICON.chart,t('t_report'),de?'Für Therapie & Arzt':'')}
     ${minor()?tile('go','eltern',ICON.plan,'Für Eltern',de?'So helft ihr':''):tile('go','helfer',ICON.plan,'Für Helfer',de?'Info für Vertraute':'')}
   </div>
+  ${homePractice()}
   ${!de?`<p class="small muted">${t('deOnly')}</p>`:''}
   <div class="card"><h3>${t('hotTitle')}</h3>${hotlinesHTML()}</div>
   ${S.contacts.length===0?`<div class="note">Du hast noch keine Vertrauensperson eingetragen. <button class="ghost wide" style="margin-top:8px" data-a="go" data-v="settings">Jetzt eintragen</button></div>`:''}`;
@@ -515,8 +552,27 @@ const EXINFO={
  g54321:{name:()=>'5-4-3-2-1',intro:()=>t('i_54321')},
  rechnen:{name:()=>t('e_rechnen'),intro:()=>t('i_rechnen')},
  muskel:{name:()=>t('e_muskel'),intro:()=>t('i_muskel')},
- skill:{name:()=>t('e_skill'),intro:()=>t('i_skill')}
+ skill:{name:()=>t('e_skill'),intro:()=>t('i_skill')},
+ schublade:{name:()=>'Meine Schublade',intro:()=>v('Manchmal ist ein Gedanke gerade zu groß. Den packen wir zusammen weg, in eine Schublade. Nicht für immer, nur bis du wieder Kraft dafür hast.','Bei dieser Übung legst du einen belastenden Gedanken bewusst in eine gedachte Schublade. Er ist nicht weg, aber er darf warten, bis du Zeit und Kraft dafür hast.','Bei dieser Übung legen Sie einen belastenden Gedanken bewusst in eine gedachte Schublade. Er ist nicht weg, aber er darf warten, bis Sie Zeit und Kraft dafür haben.')},
+ traum:{name:()=>'Traumreise',intro:()=>v('Wir machen eine kleine Traumreise an einen Ort, an dem du dich sicher fühlst. Mach es dir bequem. Wenn du magst, schalt das Vorlesen an und schließ die Augen.','Diese Fantasiereise führt dich an einen ruhigen, sicheren Ort. Mach es dir bequem. Wenn du magst, schalte das Vorlesen ein und schließe die Augen.','Diese Fantasiereise führt Sie an einen ruhigen, sicheren Ort. Machen Sie es sich bequem. Wenn Sie möchten, schalten Sie das Vorlesen ein und schließen die Augen.')},
+ bilder:{name:()=>'Bilderraten',intro:()=>v('Hier wird ein Bild langsam scharf. Rate, was es ist. Schau ganz genau hin!','Ein unscharfes Bild wird nach und nach deutlicher. Tippe an, was du erkennst. Das lenkt die Aufmerksamkeit nach außen.','Ein unscharfes Bild wird nach und nach deutlicher. Tippen Sie an, was Sie erkennen. Das lenkt die Aufmerksamkeit nach außen.')}
 };
+/* Übungen für zu Hause: erst üben, ab UNLOCK Durchgängen auch im Notfall */
+const HOMEEX=['schublade','traum','bilder'],UNLOCK=3;
+const HOMEFIT={panik:['bilder','traum'],gedanken:['schublade','bilder'],wut:['schublade','bilder'],leere:['bilder','traum'],anders:['schublade','bilder','traum']};
+function pc(k){return (S.practice&&S.practice[k])||0}
+function unlocked(k){return S.lang==='de'&&pc(k)>=UNLOCK}
+function countPractice(k){S.practice=Object.assign({},S.practice);const b=pc(k);S.practice[k]=b+1;save();return b<UNLOCK&&b+1>=UNLOCK}
+function withHome(base,w){const fit=(HOMEFIT[w]||[]).filter(unlocked).sort((a,b)=>pc(b)-pc(a));if(!fit.length)return base;const p=base.slice();p.splice(1,0,fit[0]);return p.slice(0,3)}
+function homePractice(){
+  if(S.lang!=='de')return '';
+  const meta={schublade:[ICON.drawer,'Gedanken weglegen'],traum:[ICON.sun,'An deinen sicheren Ort'],bilder:[ICON.image,'Genau hinschauen']};
+  const tile=k=>{const n=pc(k),u=n>=UNLOCK;return `<button class="tile" data-a="ex" data-v="${k}">${meta[k][0]}<div>${EXINFO[k].name()}<br><span class="sub">${meta[k][1]}</span>
+    ${u?`<br><span class="sub unl">✓ ${v('Auch für Notfälle','Auch für Notfälle','Auch für Notfälle')}</span>`:`<div class="meter" aria-label="${n} von ${UNLOCK} geübt">${Array.from({length:UNLOCK},(_,i)=>`<i class="${i<n?'on':''}"></i>`).join('')}</div>`}</div></button>`};
+  return `<div class="sechead"><h2>Üben zu Hause</h2><p class="small muted">${v('Diese Übungen klappen am besten, wenn du in Ruhe bist, zum Beispiel zu Hause. Hast du eine 3-mal gemacht, schlag ich sie dir auch in schweren Momenten vor.','Diese Übungen wirken am besten in ruhiger Umgebung, zum Beispiel zu Hause. Nach 3 Übungsrunden schlägt Anker sie auch in akuten Momenten vor.','Diese Übungen wirken am besten in ruhiger Umgebung, zum Beispiel zu Hause. Nach 3 Übungsrunden schlägt Anker sie Ihnen auch in akuten Momenten vor.')}</p></div>
+  <div class="grid">${HOMEEX.map(tile).join('')}
+    <button class="tile" data-a="go" data-v="drawer">${ICON.lock}<div>Schublade öffnen<br><span class="sub">${S.drawer.length?`${S.drawer.length} ${S.drawer.length===1?'Zettel':'Zettel'} drin`:'Noch leer'}</span></div></button></div>`;
+}
 const PLANS={panik:['atem','g54321','muskel'],gedanken:['g54321','rechnen','atem'],wut:['muskel','atem','skill'],leere:['g54321','skill','atem'],anders:['atem','g54321','skill']};
 
 async function helpFlow(){
@@ -530,11 +586,13 @@ async function helpFlow(){
   H.what=w;
   if(w==='krise'){logDiary(false);return go('krise')}
   if(lvl<=3) await bot(t('early'));
-  const plan=PLANS[w];
+  const plan=withHome(PLANS[w],w);
   for(let i=0;i<plan.length;i++){
     const ex=plan[i];H.ex.push(ex);
-    await bot(EXINFO[ex].intro());
-    await RUN[ex](exBox());
+    const home=HOMEEX.includes(ex);
+    await bot((home?`<b>${EXINFO[ex].name()}</b>: ${v(`Die hast du schon ${pc(ex)}-mal geübt. Das kannst du!`,`Diese Übung hast du schon ${pc(ex)}-mal geübt.`,`Diese Übung haben Sie schon ${pc(ex)}-mal geübt.`)} `:'')+EXINFO[ex].intro());
+    const full=await RUN[ex](exBox());
+    if(home&&full!==false)countPractice(ex);
     await bot(t('askNow'));
     const now=await askLevel(); H.after=now;
     if(now>=10){await bot(t('alarmNow'));await sleep(700);logDiary(true);return go('alarm',{from:'help'})}
@@ -553,7 +611,7 @@ async function helpFlow(){
   if(next==='home')go('home');
   else if(next==='alarm')go('alarm',{from:'help'});
   else if(next==='card')go('card');
-  else {await bot(t('which'));const e=await ask(Object.keys(EXINFO).map(k=>({label:EXINFO[k].name(),v:k})));await bot(EXINFO[e].intro());await RUN[e](exBox());await bot(t('goodJob'));await ask([{label:t('toHome'),v:1}]);go('home')}
+  else {await bot(t('which'));const e=await ask(Object.keys(EXINFO).filter(k=>!HOMEEX.includes(k)||unlocked(k)).map(k=>({label:EXINFO[k].name(),v:k})));await bot(EXINFO[e].intro());const full=await RUN[e](exBox());if(HOMEEX.includes(e)&&full!==false)countPractice(e);await bot(t('goodJob'));await ask([{label:t('toHome'),v:1}]);go('home')}
 }
 function contactCallList(){
   if(!S.contacts.length)return '';
@@ -635,14 +693,154 @@ RUN.skill=(box)=>new Promise(res=>{
     function end(){if(ended)return;ended=true;clearInterval(id);box.innerHTML=`<p><b>${esc(s.t)}</b> ✓</p>`;res()}
     draw();id=every(()=>{if(ended)return;left--;if(left<=0)return end();draw()},1000);});
 });
+/* ---- Meine Schublade ---- */
+RUN.schublade=(box)=>new Promise(res=>{
+  let text='';
+  const sv=(du,sie)=>v(du,du,sie);
+  function write(){
+    box.innerHTML=`<p>${v('Was geht dir gerade im Kopf rum? Schreib es kurz auf, ein paar Worte reichen.','Was beschäftigt dich gerade? Schreib es in ein paar Worten auf.','Was beschäftigt Sie gerade? Schreiben Sie es in ein paar Worten auf.')}</p>
+    <textarea id="dr-in" rows="3" maxlength="300" placeholder="${sv('z. B. der Streit mit …, die Prüfung am Montag','z. B. das Gespräch mit …, die Frist am Montag')}" aria-label="Gedanke"></textarea>
+    <button data-put>In die Schublade legen</button>
+    <button class="ghost" data-think>${sv('Lieber nur in Gedanken','Lieber nur in Gedanken')}</button>
+    <button class="ghost" data-end>${t('done')}</button>`;
+    box.querySelector('[data-put]').onclick=()=>{const i=box.querySelector('#dr-in');text=i.value.trim();if(!text){i.focus();return}anim()};
+    box.querySelector('[data-think]').onclick=think;
+    box.querySelector('[data-end]').onclick=()=>{box.innerHTML='';res(false)};
+  }
+  function think(){
+    text='';
+    const s=sv('Denk an das, was dich gerade belastet. Stell dir vor, du schreibst es auf einen Zettel und faltest ihn ganz klein zusammen.','Denken Sie an das, was Sie gerade belastet. Stellen Sie sich vor, Sie schreiben es auf einen Zettel und falten ihn ganz klein zusammen.');
+    box.innerHTML=`<p>${s}</p><button data-ok>${sv('Hab ich','Bereit')}</button>`;speak(s);
+    box.querySelector('[data-ok]').onclick=anim;
+  }
+  function anim(){
+    const label=text?esc(text.length>60?text.slice(0,60)+' …':text):sv('Mein Gedanke','Mein Gedanke');
+    box.innerHTML=`<div class="cabwrap" aria-hidden="true"><div class="paper">${label}</div><div class="cab"><div class="tray"></div><div class="front"><span class="knob"></span><span class="lk">${ICON.lock}</span></div></div></div><p class="say" data-say aria-live="polite"></p>`;
+    const w=box.querySelector('.cabwrap'),say=box.querySelector('[data-say]');
+    const seq=[
+      [400,'open',sv('Die Schublade geht auf.','Die Schublade geht auf.')],
+      [2600,'in',sv('Du legst den Zettel hinein. Ganz bewusst.','Sie legen den Zettel hinein. Ganz bewusst.')],
+      [5200,'-open',sv('Jetzt schiebst du sie langsam zu.','Jetzt schieben Sie sie langsam zu.')],
+      [7600,'locked',sv('Abgeschlossen. Dein Gedanke ist sicher aufgehoben. Du kannst ihn später wieder rausholen.','Abgeschlossen. Der Gedanke ist sicher aufgehoben. Sie können ihn später wieder herausholen.')]];
+    seq.forEach(([ms,c,s])=>later(()=>{if(c[0]==='-')w.classList.remove(c.slice(1));else w.classList.add(c);say.textContent=s;speak(s);if(c==='locked')buzz(120)},ms));
+    later(()=>text?when():finish(),10200);
+  }
+  function when(){
+    const opts=['Heute Abend','Morgen','Mit einer Vertrauensperson','In der Therapie','Weiß ich noch nicht'];
+    box.insertAdjacentHTML('beforeend',`<p>${sv('Wann möchtest du wieder reinschauen?','Wann möchten Sie wieder hineinschauen?')}</p>${opts.map(o=>`<button class="choice" data-w="${o}">${o}</button>`).join('')}`);
+    box.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{S.drawer.unshift({t:Date.now(),text,when:b.dataset.w});S.drawer=S.drawer.slice(0,100);save();finish()});
+    scrollEnd();
+  }
+  function finish(){
+    box.innerHTML=`<p><b>${t('exDone')}</b></p><p class="muted">${sv('Wenn der Gedanke zurückkommt, sag dir: „Das liegt in meiner Schublade. Darum kümmere ich mich später.“','Wenn der Gedanke zurückkommt, sagen Sie sich: „Das liegt in meiner Schublade. Darum kümmere ich mich später.“')}</p>`;
+    res(true);
+  }
+  write();
+});
+VIEWS.drawer=()=>`${topbar('Meine Schublade')}
+  <p class="muted">${v('Hier liegt, was du weggepackt hast. Mach die Schublade nur auf, wenn du gerade Kraft dafür hast.','Hier liegt, was du weggelegt hast. Öffne die Schublade nur, wenn du gerade Kraft dafür hast.','Hier liegt, was Sie weggelegt haben. Öffnen Sie die Schublade nur, wenn Sie gerade Kraft dafür haben.')}</p>
+  ${S.drawer.length?S.drawer.map((d,i)=>`<div class="card"><p class="small muted">${fmtDate(d.t)}${d.when?` · Wieder ansehen: ${esc(d.when)}`:''}</p><p>${esc(d.text)}</p>
+    <div class="row"><button class="soft" style="flex:1" data-a="drawer-done" data-i="${i}">Erledigt, rausnehmen</button></div></div>`).join(''):`<div class="card"><p>Die Schublade ist leer.</p></div>`}
+  <button class="wide" data-a="ex" data-v="schublade">Etwas Neues weglegen</button>`;
+
+/* ---- Traumreise ---- */
+const PLACES={
+ strand:{n:'Strand',at:'am Strand',see:'das weite Meer, hellen Sand und einen freien Himmel',hear:'das gleichmäßige Rauschen der Wellen',feel:'den warmen Sand unter den Füßen und eine leichte Brise',smell:'die frische, salzige Meeresluft'},
+ wald:{n:'Wald',at:'in einem ruhigen Wald',see:'hohe Bäume, weiches Moos und Licht, das durch die Blätter fällt',hear:'Vögel und das leise Rascheln der Blätter',feel:'den weichen Waldboden unter den Füßen',smell:'Holz, Erde und frische Luft'},
+ wiese:{n:'Blumenwiese',at:'auf einer Blumenwiese',see:'bunte Blumen, hohes Gras und ein paar Schmetterlinge',hear:'das Summen der Bienen und den Wind im Gras',feel:'die warme Sonne auf der Haut',smell:'Blumen und frisch gemähtes Gras'},
+ zimmer:{n:'Gemütliches Zimmer',at:'in einem gemütlichen Zimmer',see:'warmes Licht, weiche Kissen und eine dicke Decke',hear:'Regen, der leise ans Fenster tippt',feel:'die weiche, warme Decke um dich herum',smell:'warmen Tee oder Kakao'},
+ berg:{n:'Berge',at:'auf einer Bergwiese',see:'weite Täler, Gipfel und ziehende Wolken',hear:'Stille und ganz weit weg ein paar Kuhglocken',feel:'klare, kühle Luft auf dem Gesicht',smell:'Kräuter und frische Bergluft'}};
+function dreamSteps(){
+  const sv=(du,sie)=>v(du,du,sie);
+  const own=S.dreamKind==='eigen',P=own?null:PLACES[S.dreamKind]||PLACES.strand;
+  const at=own?`an deinem Ort: ${esc(S.dreamPlace)}`:P.at, atS=own?`an Ihrem Ort: ${esc(S.dreamPlace)}`:P.at;
+  return [
+   sv('Mach es dir bequem. Wenn du magst, schließ die Augen oder schau auf einen Punkt vor dir. Atme ein paarmal ruhig ein und langsam aus.','Machen Sie es sich bequem. Wenn Sie möchten, schließen Sie die Augen oder schauen auf einen Punkt vor sich. Atmen Sie ein paarmal ruhig ein und langsam aus.'),
+   sv(`Stell dir vor, du bist jetzt ${at}. Hier bist du ganz sicher. Niemand kann dich stören.`,`Stellen Sie sich vor, Sie sind jetzt ${atS}. Hier sind Sie ganz sicher. Niemand kann Sie stören.`),
+   own?sv('Schau dich in Ruhe um. Was siehst du? Welche Farben, welches Licht?','Schauen Sie sich in Ruhe um. Was sehen Sie? Welche Farben, welches Licht?'):sv(`Schau dich in Ruhe um. Du siehst ${P.see}.`,`Schauen Sie sich in Ruhe um. Sie sehen ${P.see}.`),
+   own?sv('Hör genau hin. Was kannst du hören? Vielleicht ist es auch ganz still.','Hören Sie genau hin. Was können Sie hören? Vielleicht ist es auch ganz still.'):sv(`Hör genau hin. Du hörst ${P.hear}.`,`Hören Sie genau hin. Sie hören ${P.hear}.`),
+   own?sv('Spür nach, wie sich der Ort anfühlt. Ist es warm oder kühl? Worauf sitzt oder stehst du?','Spüren Sie nach, wie sich der Ort anfühlt. Ist es warm oder kühl? Worauf sitzen oder stehen Sie?'):sv(`Spür nach, wie sich das anfühlt: ${P.feel}.`,`Spüren Sie nach, wie sich das anfühlt: ${P.feel.replace('um dich','um Sie')}.`),
+   own?sv('Atme tief ein. Wie riecht es dort?','Atmen Sie tief ein. Wie riecht es dort?'):sv(`Atme tief ein. Es riecht nach ${P.smell}.`,`Atmen Sie tief ein. Es riecht nach ${P.smell}.`),
+   sv('Bleib noch einen Moment hier. Merk dir, wie ruhig und sicher es sich anfühlt. Du kannst jederzeit hierher zurückkommen.','Bleiben Sie noch einen Moment hier. Merken Sie sich, wie ruhig und sicher es sich anfühlt. Sie können jederzeit hierher zurückkommen.'),
+   sv('Jetzt kommst du langsam zurück. Beweg deine Finger und Zehen. Streck dich ein bisschen. Und dann öffne die Augen und schau dich im Raum um.','Jetzt kommen Sie langsam zurück. Bewegen Sie Finger und Zehen. Strecken Sie sich ein wenig. Dann öffnen Sie die Augen und schauen sich im Raum um.')];
+}
+RUN.traum=(box)=>new Promise(res=>{
+  const sv=(du,sie)=>v(du,du,sie);
+  function pick(){
+    const cur=S.dreamKind;
+    box.innerHTML=`<p>${sv('Wohin soll die Reise gehen?','Wohin soll die Reise gehen?')}</p>
+    ${Object.entries(PLACES).map(([k,p])=>`<button class="choice" data-k="${k}">${cur===k?'★ ':''}${p.n}</button>`).join('')}
+    <div class="field"><label for="dr-own">${sv('Oder dein eigener Wohlfühlort','Oder Ihr eigener Wohlfühlort')}</label><input id="dr-own" maxlength="80" placeholder="z. B. Omas Garten" value="${esc(S.dreamPlace||S.plan.safe.split(/[\n,]/)[0]||'')}"></div>
+    <button class="soft" data-own>Zu diesem Ort reisen</button>`;
+    box.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{S.dreamKind=b.dataset.k;save();journey()});
+    box.querySelector('[data-own]').onclick=()=>{const i=box.querySelector('#dr-own');const x=i.value.trim();if(!x){i.focus();return}S.dreamKind='eigen';S.dreamPlace=x;save();journey()};
+  }
+  function start(){
+    if(!S.dreamKind)return pick();
+    const name=S.dreamKind==='eigen'?esc(S.dreamPlace):PLACES[S.dreamKind].n;
+    box.innerHTML=`<p>${sv('Reiseziel','Reiseziel')}: <b>${name}</b></p><button data-go>Los geht's</button><button class="ghost" data-pick>Anderen Ort wählen</button>`;
+    box.querySelector('[data-go]').onclick=journey;box.querySelector('[data-pick]').onclick=pick;
+  }
+  function journey(){
+    const steps=dreamSteps(),D=18;let i=0,left=D,ended=false,id;
+    box.innerHTML=`<div class="dream"><div class="sun" aria-hidden="true"></div><div class="dots">${steps.map(()=>'<i></i>').join('')}</div><p class="txt" aria-live="polite"></p><div class="bar"><i></i></div>
+      <div class="row" style="justify-content:center"><button class="iconbtn" data-voice aria-pressed="${S.voice}">🔊 ${t('voice')}</button><button class="iconbtn" data-next>Weiter</button></div>
+      <button class="ghost" data-end>${t('done')}</button></div>`;
+    const txt=box.querySelector('.txt'),bar=box.querySelector('.bar i'),dots=box.querySelectorAll('.dots i');
+    box.querySelector('[data-voice]').onclick=e=>{S.voice=!S.voice;save();e.currentTarget.setAttribute('aria-pressed',S.voice);if(S.voice)speak(steps[i]);else stopSpeak()};
+    function show(){txt.style.opacity=0;later(()=>{txt.innerHTML=steps[i];txt.style.opacity=1;speak(steps[i])},400);dots.forEach((d,j)=>d.classList.toggle('on',j<=i));left=D+(i===steps.length-2?8:0);bar.style.transition='none';bar.style.width='0';later(()=>{bar.style.transition=`width ${left}s linear`;bar.style.width='100%'},50)}
+    function next(){i++;if(i>=steps.length)return end(true);show()}
+    function end(full){if(ended)return;ended=true;clearInterval(id);keepAwake(false);stopSpeak();
+      box.innerHTML=`<p><b>${full?sv('Willkommen zurück.','Willkommen zurück.'):t('exDone')}</b></p><p class="muted">${sv('Dein sicherer Ort bleibt da. Du kannst jederzeit wieder hinreisen.','Ihr sicherer Ort bleibt da. Sie können jederzeit wieder hinreisen.')}</p>`;res(full||i>=4)}
+    box.querySelector('[data-next]').onclick=next;box.querySelector('[data-end]').onclick=()=>end(false);
+    keepAwake(true);show();
+    id=every(()=>{if(ended)return;left--;if(left<=0)next()},1000);
+  }
+  start();
+});
+
+/* ---- Bilderraten ---- */
+const PICS=[['🐘','Elefant'],['🦒','Giraffe'],['🐢','Schildkröte'],['🦋','Schmetterling'],['🐬','Delfin'],['🦉','Eule'],['🐝','Biene'],['🐧','Pinguin'],['🦊','Fuchs'],['🐌','Schnecke'],['🐙','Krake'],['🦀','Krebs'],['🐞','Marienkäfer'],['🐳','Wal'],
+ ['🍓','Erdbeere'],['🍌','Banane'],['🍉','Wassermelone'],['🍍','Ananas'],['🥕','Karotte'],['🍄','Pilz'],['🍕','Pizza'],['🧁','Muffin'],['🍦','Eis'],['🥨','Brezel'],
+ ['🌻','Sonnenblume'],['🌵','Kaktus'],['🌈','Regenbogen'],['🌙','Mond'],['⛄','Schneemann'],['🍀','Kleeblatt'],
+ ['⛵','Segelboot'],['🚲','Fahrrad'],['🎈','Luftballon'],['🎸','Gitarre'],['🏠','Haus'],['☂️','Regenschirm'],['⚽','Fußball'],['🚂','Lokomotive'],['🔑','Schlüssel'],['🎁','Geschenk'],['🚀','Rakete'],['⏰','Wecker']];
+RUN.bilder=(box)=>new Promise(res=>{
+  const rounds=6,deck=shuffle(PICS).slice(0,rounds);let r=0,got=0,ended=false;
+  const sv=(du,sie)=>v(du,du,sie);
+  function round(){
+    if(ended)return;
+    const [emo,name]=deck[r];const opts=shuffle([[emo,name],...shuffle(PICS.filter(p=>p[1]!==name)).slice(0,3)]);
+    let blur=30,stage=0,done=false,id;
+    box.innerHTML=`<p class="small muted">Bild ${r+1} von ${rounds}</p><div class="pic"><span aria-hidden="true" style="filter:blur(${blur}px)">${emo}</span></div>
+      <p class="muted small" data-fb>${sv('Was erkennst du schon? Eine Farbe? Eine Form?','Was erkennen Sie schon? Eine Farbe? Eine Form?')}</p>
+      <div class="guess">${opts.map(o=>`<button data-n="${esc(o[1])}">${esc(o[1])}</button>`).join('')}</div><button class="ghost" data-end>${t('done')}</button>`;
+    const img=box.querySelector('.pic span'),fb=box.querySelector('[data-fb]');
+    id=every(()=>{if(done)return;stage++;blur=Math.max(0,blur-4);img.style.filter=`blur(${blur}px)`;if(blur===0)clearInterval(id)},1400);
+    box.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{if(done||b.classList.contains('no'))return;
+      if(b.dataset.n===name){done=true;clearInterval(id);got++;img.style.filter='none';b.classList.add('ok');buzz(60);
+        const lob=blur>=18?sv('Wow, so früh erkannt!','Sehr früh erkannt!'):blur>=8?sv('Richtig, gut hingeschaut!','Richtig.'):sv('Richtig!','Richtig.');
+        fb.textContent=lob;speak(lob);r++;later(()=>r>=rounds?end(true):round(),1700)}
+      else{b.classList.add('no');fb.textContent=sv('Noch nicht. Schau weiter genau hin.','Noch nicht. Schauen Sie weiter genau hin.')}});
+    box.querySelector('[data-end]').onclick=()=>end(r>=3);
+  }
+  function end(full){if(ended)return;ended=true;box.innerHTML=`<p><b>${t('exDone')}</b></p><p class="muted">${sv(`Du hast ${got} ${got===1?'Bild':'Bilder'} erkannt. Deine Aufmerksamkeit war gerade ganz im Hier und Jetzt.`,`Sie haben ${got} ${got===1?'Bild':'Bilder'} erkannt. Ihre Aufmerksamkeit war gerade ganz im Hier und Jetzt.`)}</p>`;res(full)}
+  round();
+});
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
 VIEWS.ex=()=>`${topbar(EXINFO[V.ex].name())}<p>${EXINFO[V.ex].intro()}</p><div id="exhost"></div><div id="exafter"></div>`;
 async function runSingle(){
   const host=$('#exhost');const box=el('div','exbox');host.appendChild(box);
   speak(EXINFO[V.ex].intro());
-  await RUN[V.ex](box);
-  $('#exafter').innerHTML=`<div class="stack" style="margin-top:12px"><p>${t('wellDone')}</p><button data-a="home">${t('toHome')}</button><button class="ghost" data-a="ex" data-v="${V.ex}">${t('more')}</button></div>`;
+  const ex=V.ex,full=await RUN[ex](box);
+  let extra='';
+  if(HOMEEX.includes(ex)&&full!==false){
+    const just=countPractice(ex),n=pc(ex);
+    if(just)extra=`<div class="banner"><p><b>${v('Freigeschaltet!','Freigeschaltet!','Freigeschaltet!')}</b> ${v(`Du hast „${EXINFO[ex].name()}“ jetzt ${n}-mal geübt. Ab jetzt schlag ich dir die Übung auch vor, wenn es dir mal richtig schlecht geht.`,`Du hast „${EXINFO[ex].name()}“ ${n}-mal geübt. Ab jetzt schlägt Anker diese Übung auch in akuten Momenten vor.`,`Sie haben „${EXINFO[ex].name()}“ ${n}-mal geübt. Ab jetzt schlägt Anker diese Übung auch in akuten Momenten vor.`)}</p></div>`;
+    else if(n<UNLOCK)extra=`<p class="small muted">${n} von ${UNLOCK} Übungsrunden geschafft. ${v('Noch '+(UNLOCK-n)+'-mal, dann kannst du sie auch unterwegs nutzen.','Nach '+UNLOCK+' Runden schlägt Anker sie auch in akuten Momenten vor.','Nach '+UNLOCK+' Runden schlägt Anker sie auch in akuten Momenten vor.')}</p>`;
+  }
+  if(V.ex!==ex||!$('#exafter'))return;
+  $('#exafter').innerHTML=`<div class="stack" style="margin-top:12px">${extra}<p>${t('wellDone')}</p><button data-a="home">${t('toHome')}</button><button class="ghost" data-a="ex" data-v="${V.ex}">${t('more')}</button></div>`;
 }
 
 /* ---- Zeig-das-jemandem-Karte ---- */
@@ -820,7 +1018,7 @@ VIEWS.skills=()=>{
 
 /* ---- Tagebuch ---- */
 const WHAT={panik:'Panik',gedanken:'Gedankenkreisen',wut:'Wut/Anspannung',leere:'Leere',krise:'Krisengedanken',anders:'Anderes',notiz:'Eintrag',gedanke:'Gedanken-Check',training:'Gesprächs-Training'};
-const EXNAME={atem:'Atmen',g54321:'5-4-3-2-1',rechnen:'Rechnen',muskel:'Anspannen & Loslassen',skill:'Skill'};
+const EXNAME={atem:'Atmen',g54321:'5-4-3-2-1',rechnen:'Rechnen',muskel:'Anspannen & Loslassen',skill:'Skill',schublade:'Meine Schublade',traum:'Traumreise',bilder:'Bilderraten'};
 function levelChart(list){
   if(!list.length)return '';
   const W=Math.max(320,list.length*44),Hh=160,bw=14,sc=n=>Hh-20-(n/10)*(Hh-40);
@@ -1087,6 +1285,7 @@ function act(a,d,e){
     case 'go':return go(d.v);
     case 'help':return go(S.setup?'help':'setup');
     case 'ex':return go('ex',{ex:d.v});
+    case 'drawer-done':S.drawer.splice(+d.i,1);save();return render();
     case 'set-lang':S.lang=d.v;save();return render();
     case 'setup-next':
       if(V.step===2){S.name=$('#f-name').value.trim()}

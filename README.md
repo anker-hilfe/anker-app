@@ -15,6 +15,7 @@ Hilfe-App für Kinder, Jugendliche und Erwachsene bei Panik, Anspannung und Leer
 - Notfall-Alarm bei 10 von 10 und Melde-dich-Timer (SMS, Anruf, WhatsApp)
 - Täglicher Kurz-Check mit Hinweis, wenn es mehrere Tage schlecht geht
 - Notfallplan, Skills-Box, Tagebuch, Bericht als PDF für Therapie und Arzt
+- Üben zu Hause: Meine Schublade, Traumreise und Bilderraten. Nach 3 Übungsrunden schlägt Anker sie auch in akuten Momenten vor
 - Gesprächs-Training, Gedanken-Check, Kleine Schritte
 - Infoseiten für Vertrauenspersonen und Eltern
 - Sprachen für die Notfallhilfe: Deutsch, Englisch, Türkisch, Arabisch, Ukrainisch
