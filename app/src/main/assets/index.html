@@ -117,6 +117,30 @@ textarea{min-height:84px;resize:vertical}
 .tabbar button[aria-current="page"]{color:var(--accent);background:var(--accent-soft);font-weight:600}
 .tabspace{height:64px}
 @media print{.tabbar,.tabspace{display:none}}
+/* Version 2.2 */
+.recdot{display:flex;align-items:center;gap:10px;justify-content:center;font-family:var(--f-display);font-size:1.4rem}
+.recdot i{width:16px;height:16px;border-radius:50%;background:var(--alarm);animation:blink 1s infinite}
+.recdot.play i{background:var(--accent)}
+@keyframes blink{50%{opacity:.25}}
+.sndbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.sndbar .iconbtn{min-height:40px;padding:8px 12px}
+.sndbig{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.sndbig .tile{align-items:center;text-align:center;min-height:100px}
+[data-snd][aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.quiet{filter:saturate(.3)}
+.exbox .dark{background:#000;color:#9a9a9a;border-radius:var(--r);min-height:320px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:16px;text-align:center;padding:20px}
+.ogtxt{font-size:1.2rem;line-height:1.5}
+.tapcount{width:100%;min-height:150px;flex-direction:column;background:var(--accent-soft);color:var(--ink)}
+.sw{display:inline-block;width:18px;height:18px;border-radius:50%;vertical-align:middle;border:1px solid var(--line)}
+.feelgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.feel{flex-direction:column;background:var(--surface);color:var(--ink);border:3px solid color-mix(in srgb,var(--fc) 45%,transparent);min-height:104px;gap:4px}
+.feel span{font-size:2.2rem;line-height:1}
+.big2 .choice{flex:1 1 45%}
+.badgegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.badge{background:var(--surface);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:4px;align-items:center;text-align:center;opacity:.55;filter:grayscale(1)}
+.badge.on{opacity:1;filter:none;box-shadow:inset 0 0 0 2px var(--ok)}
+.badge .be{font-size:2.2rem}
+.lrow.acc{display:block;cursor:pointer}.lrow.acc summary{padding:2px 0}.lrow.acc p{margin-top:6px}
+.lrow .iconbtn{flex:none}
 /* Üben zu Hause */
 .sechead{display:flex;flex-direction:column;gap:4px;margin-top:4px}
 .tile .unl{color:var(--ok);font-weight:600}
@@ -198,12 +222,14 @@ const DEF={setup:false,lang:'de',name:'',age:'erw',tone:'kumpel',contacts:[],loc
   plan:{signs:'',helps:'',safe:'',reasons:''},
   skillFav:[],skillOwn:[],stepsOwn:[],stepsDone:{},diary:[],
   voice:false,vib:true,checks:[],timer:null,pin:'',discreet:false,remind:false,remindHour:20,cardText:'',
-  practice:{},drawer:[],dreamKind:'',dreamPlace:'',seenVersion:''};
+  practice:{},drawer:[],dreamKind:'',dreamPlace:'',seenVersion:'',
+  exDone:{},voiceN:0,badgesSeen:[],theme:'auto',fontSize:1,diaryPin:''};
 function clone(o){return JSON.parse(JSON.stringify(o))}
 function load(){try{const r=localStorage.getItem(KEY);if(r)return Object.assign(clone(DEF),JSON.parse(r))}catch(e){}return clone(DEF)}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 let S=load();
-let UNLOCKED=false;
+let UNLOCKED=false,DIARY_OPEN=false;
+const DIARY_VIEWS=['diary','report'];
 
 /* ============ Native Brücke (Android-App) ============ */
 const NATIVE=(()=>{try{return !!(window.AnkerNative&&AnkerNative.isAvailable())}catch(e){return false}})();
@@ -425,12 +451,14 @@ function hotlinesHTML(){
 const TERMIN_HINT='<p class="small"><b>Therapieplatz finden:</b> Der Patientenservice <b>116117</b> vermittelt Termine für ein psychotherapeutisches Erstgespräch (Sprechstunde), auch online auf 116117.de. Bei Kindern und Jugendlichen helfen außerdem Kinderarzt oder Kinderärztin weiter.</p>';
 
 /* ============ Navigation ============ */
-const OPEN_WHEN_LOCKED=['help','krise','alarm','ex','card','helfer','lock','setup'];
+const OPEN_WHEN_LOCKED=['callme','onthego','body','sounds','help','krise','alarm','ex','card','helfer','lock','setup'];
 let V={name:'home'};
 function go(name,params={}){
   if(name==='home'&&!S.setup)name='setup';
   if(S.pin&&!UNLOCKED&&!OPEN_WHEN_LOCKED.includes(name)){params={next:name};name='lock'}
-  GEN++;clearTimers();stopSpeak();keepAwake(false);V=Object.assign({name},params);render();window.scrollTo(0,0)}
+  if(!DIARY_VIEWS.includes(name)&&name!=='dlock')DIARY_OPEN=false;
+  if(S.diaryPin&&!DIARY_OPEN&&DIARY_VIEWS.includes(name)&&name!=='lock'){params={next:name};name='dlock';PINBUF=''}
+  GEN++;clearTimers();stopSpeak();keepAwake(false);if(name!=='ex')SOUND.stop(true);REC.stopPlay();if(REC.mr&&REC.mr.state==='recording')REC.stop();V=Object.assign({name},params);render();window.scrollTo(0,0)}
 window.ankerBack=function(){if(V.name==='news'&&!V.all){S.seenVersion=APP_VERSION;save()}if(V.name==='home'&&HOMETAB!=='hilfe'){HOMETAB='hilfe';render();return 'true'}if(V.name==='home'||V.name==='setup'||V.name==='lock')return 'false';if(V.name==='alarm'&&V.phase==='count'){cancelAlarm();return 'true'}go('home');return 'true'};
 window.ankerLaunch=function(w){if(w==='hilfe')go(S.setup?'help':'setup');else if(w==='check'||w==='')go('home');else if(w==='zeigen')go('card');else if(w==='helfer')go('helfer')};
 
@@ -526,13 +554,25 @@ function trendCard(){
 
 /* ---- Was ist neu? Neue Einträge immer OBEN anfügen und APP_VERSION erhöhen ---- */
 const CHANGELOG=[
- {v:'1.3',d:'08.11.2026',title:'Übersichtlicher und neue Übungen',items:[
+ {v:'2.2',d:'08.11.2026',title:'Mehr Hilfe für schwere Momente',items:[
+   [ICON.talk,'Stimme zum Festhalten','Nimm eine Mutmacher-Nachricht auf, oder lass sie von einer Vertrauensperson einsprechen. Im Notfall spielt Anker sie dir vor.'],
+   [ICON.phone,'Bitte um Anruf','Ein Tipp, und deine Vertrauensperson bekommt die Bitte, dich anzurufen. Ganz ohne Alarm.'],
+   [ICON.steps,'Unterwegs-Modus','Unauffällige Übungen für Bus, Schule oder Arbeit, zum Beispiel Atmen nur mit Vibration.'],
+   [ICON.sun,'Beruhigende Klänge','Regen, Meer oder Wind, auch ohne Internet. Passt gut zum Atmen.'],
+   [ICON.bulb,'Mein Körper bei Angst','Kurz erklärt, warum das Herz rast oder alles schwindelig wird.'],
+   [ICON.eye,'Gefühle benennen','Finde heraus, was du gerade fühlst, und bekomm passende Tipps.'],
+   [ICON.plan,'Abzeichen','Kleine Belohnungen fürs Üben, ganz ohne Druck.'],
+   [ICON.box,'Daten sichern','Nimm alles auf ein neues Handy mit.'],
+   [ICON.gear,'Schrift und Farben','In den Einstellungen: größere Schrift und hell oder dunkel.'],
+   [ICON.lock,'Tagebuch mit PIN','Schütze dein Tagebuch mit einer eigenen PIN.'],
+   [ICON.book,'Feedback geben','Schick Ideen und Fehler direkt aus der App.']]},
+ {v:'2.1',d:'08.11.2026',title:'Übersichtlicher und neue Übungen',items:[
    [ICON.anchor,'Neue Startseite','Unten gibt es jetzt drei Reiter: <b>Hilfe</b>, <b>Üben</b> und <b>Mein Plan</b>. So findest du alles schneller.'],
    [ICON.drawer,'Meine Schublade','Leg belastende Gedanken in eine Schublade und hol sie später wieder raus, wenn du Kraft hast.'],
    [ICON.sun,'Traumreise','Eine ruhige Fantasiereise an deinen sicheren Ort, zum Beispiel Strand, Wald oder einen eigenen Ort.'],
    [ICON.image,'Bilderraten','Ein Bild wird langsam scharf. Rate, was es ist, und hol deine Aufmerksamkeit ins Hier und Jetzt.'],
    [ICON.plan,'Erst üben, dann im Notfall','Hast du eine dieser Übungen 3-mal gemacht, schlägt Anker sie dir auch in schweren Momenten vor.']]},
- {v:'1.2',d:'08.11.2026',title:'Schneller Zugriff',items:[
+ {v:'2.0',d:'08.11.2026',title:'Schneller Zugriff',items:[
    [ICON.anchor,'Widget und Schnellstart','Starte die Hilfe direkt vom Startbildschirm deines Handys (Android).'],
    [ICON.clock,'Erinnerung','Auf Wunsch erinnert dich Anker täglich an den Kurz-Check.']]}];
 const APP_VERSION=CHANGELOG[0].v;
@@ -559,7 +599,7 @@ VIEWS.home=()=>{
   const timerBanner=tm?`<div class="banner"><p><b>Melde-dich-Timer läuft</b> bis ${fmtTime(tm.until)} Uhr. Danach werden ${esc(tm.names)} benachrichtigt.</p><div class="row"><button style="flex:1" data-a="timer-stop">Ich bin sicher, stoppen</button><button class="ghost" data-a="timer-add">+15 Min.</button></div></div>`:'';
   const tile=(a,vv,icon,title,sub)=>`<button class="tile" data-a="${a}" ${vv?`data-v="${vv}"`:''}>${icon}<div>${title}${sub?`<br><span class="sub">${sub}</span>`:''}</div></button>`;
   let body='';
-  if(HOMETAB==='hilfe') body=`${timerBanner}
+  if(HOMETAB==='hilfe') body=`${timerBanner}${badgeBanner()}
   <div class="stack"><h1>${t('hello',S.name?nm():'')}</h1><p class="muted">${t('helloSub')}</p></div>
   <button class="sos" data-a="help">${t('sosTitle')}<small>${t('sosSub')}</small></button>
   ${trendCard()}
@@ -568,6 +608,10 @@ VIEWS.home=()=>{
   <div class="grid">
     ${tile('ex','atem',ICON.breath,t('t_atem'),t('t_atemSub'))}
     ${tile('ex','g54321',ICON.eye,'5-4-3-2-1',t('t_54321Sub'))}
+    ${de?tile('go','callme',ICON.phone,'Ruf mich an','Bitte an Vertraute'):''}
+    ${de?(S.voiceN?tile('go','voice',ICON.talk,'Meine Stimme',`${S.voiceN} ${S.voiceN===1?'Nachricht':'Nachrichten'}`):tile('go','voice',ICON.talk,'Stimme aufnehmen','Mutmacher für später')):''}
+    ${de?tile('go','onthego',ICON.steps,'Unterwegs','Unauffällig üben'):''}
+    ${de?tile('go','sounds',ICON.sun,'Klänge','Regen, Meer, Wind'):''}
     ${tile('go','card',ICON.card,t('t_card'),t('t_cardSub'))}
     ${tile('go','timer',ICON.clock,t('t_timer'),de?'Für den Heimweg':'')}
   </div>
@@ -576,6 +620,10 @@ VIEWS.home=()=>{
   if(HOMETAB==='ueben') body=`${timerBanner}<h1>${de?'Üben':'Practice'}</h1>
   ${de?`<section class="stack"><h2 class="sect">Zu Hause üben</h2><p class="small muted">${v('Klappt am besten, wenn du in Ruhe bist. Nach 3 Runden schlag ich dir die Übung auch in schweren Momenten vor.','Wirkt am besten in ruhiger Umgebung. Nach 3 Runden schlägt Anker die Übung auch in akuten Momenten vor.','Wirkt am besten in ruhiger Umgebung. Nach 3 Runden schlägt Anker die Übung auch in akuten Momenten vor.')}</p>
   <div class="list">${lrow('ex','schublade',ICON.drawer,'Meine Schublade','Gedanken weglegen',meterHTML('schublade'))}${lrow('ex','traum',ICON.sun,'Traumreise','An deinen sicheren Ort',meterHTML('traum'))}${lrow('ex','bilder',ICON.image,'Bilderraten','Genau hinschauen',meterHTML('bilder'))}</div></section>`:''}
+  ${de?`<section class="stack"><h2 class="sect">Verstehen &amp; Spüren</h2><div class="list">
+    ${lrow('go','feel',ICON.eye,'Gefühle benennen','Was fühle ich gerade?')}
+    ${lrow('go','body',ICON.bulb,'Mein Körper bei Angst','Warum das Herz rast')}
+    ${lrow('go','sounds',ICON.sun,'Beruhigende Klänge','Regen, Meer, Wind')}</div></section>`:''}
   <section class="stack"><h2 class="sect">${de?'Körper & Kopf':'Body & mind'}</h2><div class="list">
     ${lrow('ex','muskel',ICON.breath,EXINFO.muskel.name(),de?'Spannung abbauen':'')}
     ${lrow('ex','rechnen',ICON.calc,EXINFO.rechnen.name(),de?'Kopf ablenken':'')}
@@ -588,13 +636,19 @@ VIEWS.home=()=>{
   <section class="stack"><h2 class="sect">${de?'Vorbereitet sein':'Be prepared'}</h2><div class="list">
     ${lrow('go','plan',ICON.plan,t('t_plan'),de?'Meine Sätze für schwere Momente':'')}
     ${lrow('go','skills',ICON.box,t('t_skills'),de?'Was mir hilft':'')}
+    ${de?lrow('go','voice',ICON.talk,'Stimme zum Festhalten',S.voiceN?`${S.voiceN} ${S.voiceN===1?'Aufnahme':'Aufnahmen'}`:'Mutmacher aufnehmen'):''}
     ${de?lrow('go','drawer',ICON.lock,'Meine Schublade',S.drawer.length?`${S.drawer.length} Zettel drin`:'Noch leer'):''}
     ${lrow('go','settings',ICON.phone,de?'Vertrauenspersonen':'Trusted contacts',de?(S.contacts.length?`${S.contacts.length} eingetragen`:'Noch niemand eingetragen'):'')}</div></section>
   <section class="stack"><h2 class="sect">${de?'Rückblick':'Review'}</h2><div class="list">
-    ${lrow('go','diary',ICON.book,t('t_diary'),de?`${S.diary.length} Einträge`:'')}
+    ${de?lrow('go','badges',ICON.plan,'Abzeichen',`${earned().length} von ${BADGES.length} gesammelt`):''}
+    ${lrow('go','diary',ICON.book,t('t_diary'),de?(S.diaryPin?'🔒 Mit PIN geschützt':`${S.diary.length} ${S.diary.length===1?'Eintrag':'Einträge'}`):'')}
     ${lrow('go','report',ICON.chart,t('t_report'),de?'Für Therapie & Arzt':'')}</div></section>
   <section class="stack"><h2 class="sect">${de?'Für andere':'For others'}</h2><div class="list">
     ${minor()?lrow('go','eltern',ICON.plan,'Für Eltern',de?'So helft ihr':''):lrow('go','helfer',ICON.plan,'Für Helfer',de?'Info für Vertraute':'')}</div></section>
+  ${de?`<section class="stack"><h2 class="sect">App</h2><div class="list">
+    ${lrow('go','backup',ICON.box,'Daten sichern','Auf ein neues Handy mitnehmen')}
+    ${lrow('go','feedback',ICON.book,'Feedback geben','Ideen und Fehler melden')}
+    ${lrow('news-all','',ICON.anchor,'Was ist neu?','Version '+APP_VERSION)}</div></section>`:''}
   ${!de?`<p class="small muted">${t('deOnly')}</p>`:''}`;
   return top+body+bar;
 };
@@ -641,6 +695,13 @@ async function helpFlow(){
   H.what=w;
   if(w==='krise'){logDiary(false);return go('krise')}
   if(lvl<=3) await bot(t('early'));
+  if(S.lang==='de'){
+    if(lvl>=7&&lvl<=9&&S.contacts.length){const c=S.contacts[0];
+      await bot(sv(`Soll ich ${esc(c.name)} bitten, dich anzurufen? Das ist kein Alarm, nur eine kurze Nachricht.`,`Soll ich ${esc(c.name)} bitten, Sie anzurufen? Das ist kein Alarm, nur eine kurze Nachricht.`));
+      if(await ask([{label:'Ja, bitte',v:true},{label:'Nein',v:false}])){const r=sendCallMe(c);await bot(callMeResult(c,r),300)}}
+    if(w==='panik')await bot(sv('Kurz zur Info: Was du gerade spürst, ist Adrenalin. Es fühlt sich schlimm an, ist aber nicht gefährlich und geht vorbei.','Kurz zur Info: Was Sie gerade spüren, ist Adrenalin. Es fühlt sich schlimm an, ist aber nicht gefährlich und geht vorbei.'));
+    if(S.voiceN)await voiceInFlow();
+  }
   const plan=withHome(PLANS[w],w);
   for(let i=0;i<plan.length;i++){
     const ex=plan[i];H.ex.push(ex);
@@ -648,6 +709,7 @@ async function helpFlow(){
     await bot((home?`<b>${EXINFO[ex].name()}</b>: ${v(`Die hast du schon ${pc(ex)}-mal geübt. Das kannst du!`,`Diese Übung hast du schon ${pc(ex)}-mal geübt.`,`Diese Übung haben Sie schon ${pc(ex)}-mal geübt.`)} `:'')+EXINFO[ex].intro());
     const full=await RUN[ex](exBox());
     if(home&&full!==false)countPractice(ex);
+    if(!home)markEx(ex);
     await bot(t('askNow'));
     const now=await askLevel(); H.after=now;
     if(now>=10){await bot(t('alarmNow'));await sleep(700);logDiary(true);return go('alarm',{from:'help'})}
@@ -682,7 +744,7 @@ const RUN={};
 RUN.atem=(box,rounds=6)=>new Promise(res=>{
   box.innerHTML=`<div class="breath"><div class="ring"><div class="orb"></div><div class="blabel">${t('ready')}<span></span></div></div><div class="muted small" data-c></div>
    <div class="row" style="justify-content:center"><button class="iconbtn" data-vib aria-pressed="${S.vib}">📳 ${t('vib')}</button><button class="iconbtn" data-voice aria-pressed="${S.voice}">🔊 ${t('voice')}</button></div>
-   <p class="small muted" style="text-align:center">${t('i_vib')}</p>
+   <p class="small muted" style="text-align:center">${t('i_vib')}</p>${S.lang==='de'?soundBar():''}
    <button class="ghost" data-done>${t('done')}</button></div>`;
   const orb=box.querySelector('.orb'),lab=box.querySelector('.blabel'),cnt=box.querySelector('[data-c]');
   box.querySelector('[data-vib]').onclick=e=>{S.vib=!S.vib;save();e.currentTarget.setAttribute('aria-pressed',S.vib)};
@@ -839,7 +901,7 @@ RUN.traum=(box)=>new Promise(res=>{
   function journey(){
     const steps=dreamSteps(),D=18;let i=0,left=D,ended=false,id;
     box.innerHTML=`<div class="dream"><div class="sun" aria-hidden="true"></div><div class="dots">${steps.map(()=>'<i></i>').join('')}</div><p class="txt" aria-live="polite"></p><div class="bar"><i></i></div>
-      <div class="row" style="justify-content:center"><button class="iconbtn" data-voice aria-pressed="${S.voice}">🔊 ${t('voice')}</button><button class="iconbtn" data-next>Weiter</button></div>
+      <div class="row" style="justify-content:center"><button class="iconbtn" data-voice aria-pressed="${S.voice}">🔊 ${t('voice')}</button><button class="iconbtn" data-next>Weiter</button></div>${soundBar()}
       <button class="ghost" data-end>${t('done')}</button></div>`;
     const txt=box.querySelector('.txt'),bar=box.querySelector('.bar i'),dots=box.querySelectorAll('.dots i');
     box.querySelector('[data-voice]').onclick=e=>{S.voice=!S.voice;save();e.currentTarget.setAttribute('aria-pressed',S.voice);if(S.voice)speak(steps[i]);else stopSpeak()};
@@ -888,6 +950,7 @@ async function runSingle(){
   const host=$('#exhost');const box=el('div','exbox');host.appendChild(box);
   speak(EXINFO[V.ex].intro());
   const ex=V.ex,full=await RUN[ex](box);
+  if(!HOMEEX.includes(ex))markEx(ex);
   let extra='';
   if(HOMEEX.includes(ex)&&full!==false){
     const just=countPractice(ex),n=pc(ex);
@@ -1072,7 +1135,7 @@ VIEWS.skills=()=>{
 };
 
 /* ---- Tagebuch ---- */
-const WHAT={panik:'Panik',gedanken:'Gedankenkreisen',wut:'Wut/Anspannung',leere:'Leere',krise:'Krisengedanken',anders:'Anderes',notiz:'Eintrag',gedanke:'Gedanken-Check',training:'Gesprächs-Training'};
+const WHAT={panik:'Panik',gedanken:'Gedankenkreisen',wut:'Wut/Anspannung',leere:'Leere',krise:'Krisengedanken',anders:'Anderes',notiz:'Eintrag',gedanke:'Gedanken-Check',gefuehl:'Gefühl benannt',training:'Gesprächs-Training'};
 const EXNAME={atem:'Atmen',g54321:'5-4-3-2-1',rechnen:'Rechnen',muskel:'Anspannen & Loslassen',skill:'Skill',schublade:'Meine Schublade',traum:'Traumreise',bilder:'Bilderraten'};
 function levelChart(list){
   if(!list.length)return '';
@@ -1092,7 +1155,8 @@ VIEWS.diary=()=>{
     <div class="field"><label for="d-lvl">Wie stark ist die Belastung gerade? (0 bis 10)</label><input id="d-lvl" type="range" min="0" max="10" value="5" oninput="this.nextElementSibling.textContent=this.value+' von 10'"><span class="small muted">5 von 10</span></div>
     <div class="field"><label for="d-note">Was ist passiert? Was hat geholfen?</label><textarea id="d-note"></textarea></div>
     <button class="soft" data-a="diary-add">Speichern</button></div>
-  <div class="card">${d.length?d.slice(0,60).map(e=>`<div class="entry"><b>${fmtDate(e.t)}</b><span class="small">${WHAT[e.what]||''} ${e.before!=null?`· ${e.before}${e.after!=null?' → '+e.after:''} von 10`:''}${e.alarm?' · <span class="pill">Alarm</span>':''}</span>${e.note?`<span class="small muted">${esc(e.note).replace(/\n/g,'<br>')}</span>`:''}</div>`).join(''):'<p class="muted">Noch keine Einträge. Jedes Mal, wenn du den Hilfe-Knopf nutzt, entsteht hier automatisch ein Eintrag.</p>'}</div>`;
+  <div class="card">${d.length?d.slice(0,60).map(e=>`<div class="entry"><b>${fmtDate(e.t)}</b><span class="small">${WHAT[e.what]||''} ${e.before!=null?`· ${e.before}${e.after!=null?' → '+e.after:''} von 10`:''}${e.alarm?' · <span class="pill">Alarm</span>':''}</span>${e.note?`<span class="small muted">${esc(e.note).replace(/\n/g,'<br>')}</span>`:''}</div>`).join(''):'<p class="muted">Noch keine Einträge. Jedes Mal, wenn du den Hilfe-Knopf nutzt, entsteht hier automatisch ein Eintrag.</p>'}</div>
+  ${diaryPinCard()}`;
 };
 
 /* ---- Bericht ---- */
@@ -1287,6 +1351,25 @@ VIEWS.lock=()=>`<div class="stack" style="text-align:center;margin-top:24px"><h1
   <button class="danger" style="margin-top:12px" data-a="help">${t('lockSos')}</button>
   <details class="card" style="text-align:start"><summary>${t('hotTitle')}</summary>${hotlinesHTML()}</details></div>`;
 
+/* ---- Tagebuch-PIN ---- */
+VIEWS.dlock=()=>`${topbar('')}<div class="stack" style="text-align:center"><div style="color:var(--accent)">${ICON.lock.replace('<svg','<svg width="40" height="40"')}</div>
+  <h1>${V.next==='report'?'Bericht ist geschützt':'Tagebuch ist geschützt'}</h1><p class="muted">${sv('Gib deine Tagebuch-PIN ein.','Bitte geben Sie Ihre Tagebuch-PIN ein.')}</p>
+  <div class="pindots">${[0,1,2,3].map(i=>`<i class="${i<PINBUF.length?'on':''}"></i>`).join('')}</div>
+  <p class="small" style="color:var(--alarm)" ${V.err?'':'hidden'}>Falsche PIN. Versuch es nochmal.</p>
+  <div class="pin">${[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(k=>k===''?'<span></span>':`<button data-a="dpin" data-v="${k}">${k}</button>`).join('')}</div>
+  <details class="card" style="text-align:start"><summary class="small">PIN vergessen?</summary>
+    <p class="small">Die PIN lässt sich nicht wiederherstellen. Du kannst aber das Tagebuch löschen und die PIN entfernen. Alles andere in Anker bleibt erhalten.</p>
+    <div id="dforgot"><button class="ghost" data-a="dpin-forgot">Tagebuch löschen und PIN entfernen</button></div></details></div>`;
+function diaryPinCard(){
+  if(S.diaryPin)return `<div class="card"><h3>${ICON.lock.replace('<svg','<svg width="18" height="18" style="vertical-align:-3px"')} Tagebuch ist mit PIN geschützt</h3>
+    <p class="small muted">Tagebuch und Bericht fragen nach der PIN. Sobald du sie verlässt oder die App wechselst, sind sie wieder gesperrt.</p>
+    <div class="row"><input id="dp-new" type="password" inputmode="numeric" maxlength="4" placeholder="Neue PIN" style="flex:1;min-width:0" autocomplete="off"><button class="soft" data-a="dpin-set">Ändern</button></div>
+    <button class="ghost" data-a="dpin-off">PIN entfernen</button><p id="dp-msg" class="small" hidden></p></div>`;
+  return `<div class="card"><h3>Tagebuch mit PIN schützen</h3><p class="small muted">Dann kann niemand dein Tagebuch und deinen Bericht lesen, auch wenn er dein Handy in der Hand hat. Notfall-Knopf und Übungen bleiben immer offen.</p>
+    <div class="row"><input id="dp-new" type="password" inputmode="numeric" maxlength="4" placeholder="4 Ziffern" style="flex:1;min-width:0" autocomplete="off"><button class="soft" data-a="dpin-set">PIN setzen</button></div>
+    <input id="dp-rep" type="password" inputmode="numeric" maxlength="4" placeholder="PIN wiederholen" autocomplete="off">
+    <p id="dp-msg" class="small" hidden></p></div>`}
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&S.diaryPin&&DIARY_OPEN){DIARY_OPEN=false;if(DIARY_VIEWS.includes(V.name))go(V.name)}});
 /* ---- Einstellungen ---- */
 VIEWS.settings=()=>`${topbar('Einstellungen')}
   <div class="card"><div class="field"><label for="f-name">Name</label><input id="f-name" value="${esc(S.name)}"></div>
@@ -1310,9 +1393,13 @@ VIEWS.settings=()=>`${topbar('Einstellungen')}
    <p class="small muted">Mit PIN sind Tagebuch, Bericht, Notfallplan und Einstellungen geschützt. Der Notfall-Knopf, die Übungen und die Hilfe-Nummern bleiben immer ohne PIN erreichbar.</p>
    ${S.pin?`<p><b>PIN ist aktiv.</b></p><button class="ghost" data-a="pin-off">PIN entfernen</button>`
     :`<div class="row"><input id="f-pin" type="password" inputmode="numeric" maxlength="4" placeholder="4 Ziffern" style="flex:1;min-width:0" autocomplete="off"><button class="soft" data-a="pin-on">PIN setzen</button></div><p id="pin-msg" class="small" style="color:var(--alarm)" hidden>Bitte genau 4 Ziffern eingeben.</p>`}
+   <p class="small">Tagebuch-PIN: <b>${S.diaryPin?'aktiv':'aus'}</b> <button class="ghost" style="min-height:40px;padding:6px 12px" data-a="go" data-v="diary">${S.diaryPin?'Ändern':'Einrichten'}</button></p>
    <label class="toggle"><input type="checkbox" data-a="set-discreet" ${S.discreet?'checked':''}> Diskreter Modus: neutraler Name „Notizen“ ${NATIVE?'und neutrales Symbol auf dem Startbildschirm':'im Browser-Tab'}</label>
    ${S.discreet&&NATIVE?'<p class="small muted">Das Symbol auf dem Startbildschirm ändert sich nach ein paar Sekunden. Eine Verknüpfung oder ein Widget musst du eventuell neu anlegen.</p>':''}</div>
-  <div class="card"><h3>Weitere Infos</h3><button class="ghost" data-a="news-all">Was ist neu? (Version ${APP_VERSION})</button><button class="ghost" data-a="go" data-v="helfer">Seite für Vertrauenspersonen ansehen</button>${minor()?'<button class="ghost" data-a="go" data-v="eltern">Seite für Eltern ansehen</button>':''}</div>
+  <div class="card"><h3>Darstellung</h3>
+    <p class="small muted">Schriftgröße</p><div class="row seg">${[[1,'Normal'],[2,'Groß'],[3,'Sehr groß']].map(([k,l])=>`<button class="${(S.fontSize||1)===k?'':'ghost'}" style="flex:1" data-a="set-font" data-v="${k}">${l}</button>`).join('')}</div>
+    <p class="small muted">Farben</p><div class="row seg">${[['auto','Automatisch'],['light','Hell'],['dark','Dunkel']].map(([k,l])=>`<button class="${(S.theme||'auto')===k?'':'ghost'}" style="flex:1" data-a="set-theme" data-v="${k}">${l}</button>`).join('')}</div></div>
+  <div class="card"><h3>Weitere Infos</h3><button class="ghost" data-a="go" data-v="backup">Daten sichern / wiederherstellen</button><button class="ghost" data-a="go" data-v="feedback">Feedback geben</button><button class="ghost" data-a="news-all">Was ist neu? (Version ${APP_VERSION})</button><button class="ghost" data-a="go" data-v="helfer">Seite für Vertrauenspersonen ansehen</button>${minor()?'<button class="ghost" data-a="go" data-v="eltern">Seite für Eltern ansehen</button>':''}</div>
   <div class="card"><h3>Alarm testen</h3><p class="small muted">Zeigt die Nachricht, ohne etwas zu senden.</p><p class="small quote" id="testmsg" hidden></p><button class="ghost" data-a="test-alarm">Nachricht anzeigen</button>
   <p class="small">Automatisches Senden: <b>${NATIVE?'aktiv (Android-App)':'nicht verfügbar (Browser), du tippst noch auf Senden'}</b></p>
   ${NATIVE?`<button class="ghost" data-a="perms">Berechtigungen prüfen</button>`:''}</div>
@@ -1321,10 +1408,12 @@ VIEWS.settings=()=>`${topbar('Einstellungen')}
 
 /* ============ Rendern & Aktionen ============ */
 function render(){
-  applyLang();
+  applyLang();applyLook();
   app.innerHTML=(VIEWS[V.name]||VIEWS.home)();
   if(V.name==='help')helpFlow();
   if(V.name==='ex')runSingle();
+  if(V.name==='voice')renderVoiceList();
+  if(V.name==='onthego'&&V.og)runOG();
   if(V.name==='alarm')startAlarm();
   if(V.name==='card')keepAwake(true);
   if(V.name==='train'&&V.scene!=null)runScene();
@@ -1337,6 +1426,35 @@ function addContact(){
 function act(a,d,e){
   switch(a){
     case 'home':return go('home');
+    case 'set-font':S.fontSize=+d.v;save();return render();
+    case 'set-theme':S.theme=d.v;save();return render();
+    case 'v-rec':return voiceRecord();
+    case 'v-stop':return voiceStop();
+    case 'v-preview':if(RECT.blob)REC.play(RECT.blob);return;
+    case 'v-save':return voiceSave();
+    case 'v-play':IDB.all().then(a=>{const r=a.find(x=>x.id===d.i);if(r)REC.play(r.blob)});return;
+    case 'v-del':IDB.del(d.i).then(()=>renderVoiceList());return;
+    case 'callme-send':{const c=S.contacts[+d.i];if(!c)return;const r=sendCallMe(c);const box=$('#cm-res');if(box)box.insertAdjacentHTML('beforeend',callMeResult(c,r));e.disabled=true;return}
+    case 'og':V.og=d.v||'';return render();
+    case 'feel':V.f=d.v||'';V.w='';V.n=0;return render();
+    case 'feel-w':V.w=d.v;return render();
+    case 'feel-n':{V.n=+d.v;const f=FEEL.find(x=>x.k===V.f);S.diary.unshift({t:Date.now(),before:null,after:null,what:'gefuehl',ex:[],note:`Gefühl: ${f.n} – ${V.w} (Stärke ${V.n} von 5)`});save();return render()}
+    case 'badge-ok':S.badgesSeen=earned();save();return render();
+    case 'backup-make':return backupMake();
+    case 'backup-pick':return backupPick();
+    case 'backup-restore':return backupRestore();
+    case 'fb-send':{const f=fbData();if(!f)return;const url=`${REPO}/issues/new?title=${encodeURIComponent(f.title)}&body=${encodeURIComponent(f.body)}&labels=${encodeURIComponent(f.ty==='Fehler'?'bug':f.ty==='Idee'?'enhancement':'question')}`;
+      if(nat('openUrl',url)===undefined)window.open(url,'_blank','noopener');const m=$('#fb-msg');m.textContent='GitHub ist geöffnet. Dort noch auf „Submit new issue“ tippen. Danke!';m.hidden=false;return}
+    case 'fb-copy':{const f=fbData();if(!f)return;const m=$('#fb-msg');(navigator.clipboard?navigator.clipboard.writeText(f.title+'\n\n'+f.body):Promise.reject()).then(()=>{m.textContent='Text kopiert. Du kannst ihn jetzt z. B. per WhatsApp schicken.';m.hidden=false}).catch(()=>{m.textContent=f.title+'\n\n'+f.body;m.style.whiteSpace='pre-wrap';m.hidden=false});return}
+    case 'dpin':{if(d.v==='⌫')PINBUF=PINBUF.slice(0,-1);else if(PINBUF.length<4)PINBUF+=d.v;
+      if(PINBUF.length===4){if(PINBUF===S.diaryPin){DIARY_OPEN=true;PINBUF='';return go(V.next||'diary')}PINBUF='';V.err=true}else V.err=false;return render()}
+    case 'dpin-forgot':$('#dforgot').innerHTML=`<p class="small"><b>Wirklich? Alle Tagebuch-Einträge werden gelöscht.</b></p><div class="row"><button class="danger" style="flex:1" data-a="dpin-wipe">Ja, löschen</button><button class="ghost" data-a="home">Abbrechen</button></div>`;return;
+    case 'dpin-wipe':S.diary=[];S.diaryPin='';save();DIARY_OPEN=true;return go('diary');
+    case 'dpin-set':{const a=$('#dp-new').value,r=$('#dp-rep');const m=$('#dp-msg');m.hidden=false;m.style.color='var(--alarm)';
+      if(!/^\d{4}$/.test(a)){m.textContent='Bitte genau 4 Ziffern eingeben.';return}
+      if(r&&r.value!==a){m.textContent='Die beiden PINs sind nicht gleich.';return}
+      S.diaryPin=a;DIARY_OPEN=true;save();render();const m2=$('#dp-msg');if(m2){m2.hidden=false;m2.style.color='var(--ok)';m2.textContent='PIN gespeichert. Merk sie dir gut.'}return}
+    case 'dpin-off':S.diaryPin='';save();return render();
     case 'news-all':return go('news',{all:true});
     case 'news-ok':S.seenVersion=APP_VERSION;save();return go('home');
     case 'tab':HOMETAB=d.v;render();return window.scrollTo(0,0);
@@ -1400,7 +1518,7 @@ function act(a,d,e){
     case 'test-alarm':{const m=$('#testmsg');m.textContent=alarmText(S.loc?'(Link zu deinem Standort)':'');m.hidden=false;return}
     case 'perms':nat('requestPermissions');return;
     case 'wipe-ask':$('#wipe').innerHTML=`<p><b>Wirklich alles löschen?</b> Kontakte, Notfallplan und Tagebuch sind dann weg.</p><div class="row"><button class="danger" data-a="wipe">Ja, löschen</button><button class="ghost" data-a="go" data-v="settings">Abbrechen</button></div>`;return;
-    case 'wipe':nat('cancelTimer');nat('setReminder',false,20);if(S.discreet)nat('setDiscreet',false);S=clone(DEF);save();UNLOCKED=false;return go('setup',{step:0});
+    case 'wipe':IDB.clear();nat('cancelTimer');nat('setReminder',false,20);if(S.discreet)nat('setDiscreet',false);S=clone(DEF);save();UNLOCKED=false;return go('setup',{step:0});
   }
 }
 function saveTQ(){const q=TQ[V.i||0];const el2=$('#tq');if(!el2)return;V.ans=V.ans||{};V.ans[q.k]=q.slider?+el2.value:el2.value.trim()}
@@ -1409,6 +1527,264 @@ app.addEventListener('change',e=>{const b=e.target.closest('input[data-a],select
 app.addEventListener('submit',e=>{const f=e.target.closest('form[data-f]');if(!f||!['skill','step'].includes(f.dataset.f))return;e.preventDefault();
   if(f.dataset.f==='skill'){const x=$('#s-new').value.trim();if(x&&!S.skillOwn.includes(x)){S.skillOwn.push(x);S.skillFav.push(x);save()}render()}
   if(f.dataset.f==='step'){const x=$('#st-new').value.trim();if(x&&!S.stepsOwn.includes(x)){S.stepsOwn.push(x);save()}render()}});
+
+/* ================= Version 2.2: neue Funktionen ================= */
+function sv(du,sie){return v(du,du,sie)}
+function markEx(k){S.exDone=Object.assign({},S.exDone);S.exDone[k]=(S.exDone[k]||0)+1;save()}
+function exCount(k){let n=(S.exDone&&S.exDone[k])||0;return n}
+
+/* ---- Speicher für Sprachaufnahmen (IndexedDB) ---- */
+const IDB={db:null,
+  open(){return new Promise((res,rej)=>{if(this.db)return res(this.db);let r;try{r=indexedDB.open('anker',1)}catch(e){return rej(e)}
+    r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('voice'))r.result.createObjectStore('voice',{keyPath:'id'})};
+    r.onsuccess=()=>{this.db=r.result;res(this.db)};r.onerror=()=>rej(r.error)})},
+  async run(mode,fn){const db=await this.open();return new Promise((res,rej)=>{const tx=db.transaction('voice',mode);const st=tx.objectStore('voice');const q=fn(st);
+    tx.oncomplete=()=>res(q&&q.result);tx.onerror=()=>rej(tx.error)})},
+  all(){return this.run('readonly',st=>st.getAll()).then(x=>(x||[]).sort((a,b)=>b.t-a.t)).catch(()=>[])},
+  put(o){return this.run('readwrite',st=>st.put(o))},
+  del(id){return this.run('readwrite',st=>st.delete(id))},
+  clear(){return this.run('readwrite',st=>st.clear()).catch(()=>{})}};
+async function syncVoiceCount(){const a=await IDB.all();if(S.voiceN!==a.length){S.voiceN=a.length;save()}return a}
+
+/* ---- Stimme zum Festhalten ---- */
+const REC={mr:null,chunks:[],stream:null,blob:null,audio:null,url:null,
+  async start(){this.stopPlay();this.chunks=[];this.blob=null;
+    this.stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    const types=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg'];const mime=types.find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))||'';
+    this.mr=new MediaRecorder(this.stream,mime?{mimeType:mime}:undefined);
+    this.mr.ondataavailable=e=>{if(e.data&&e.data.size)this.chunks.push(e.data)};
+    return new Promise(res=>{this.mr.onstop=()=>{this.blob=new Blob(this.chunks,{type:this.mr.mimeType||mime||'audio/webm'});this.stream.getTracks().forEach(t=>t.stop());res(this.blob)};this.mr.start()})},
+  stop(){try{if(this.mr&&this.mr.state==='recording')this.mr.stop()}catch(e){}},
+  play(blob,onEnd){this.stopPlay();this.url=URL.createObjectURL(blob);this.audio=new Audio(this.url);this.audio.onended=()=>{this.stopPlay();onEnd&&onEnd()};
+    return this.audio.play().catch(()=>{onEnd&&onEnd()})},
+  stopPlay(){try{if(this.audio){this.audio.pause();this.audio=null}if(this.url){URL.revokeObjectURL(this.url);this.url=null}}catch(e){}}};
+const VOICE_IDEAS=['Du hast das schon so oft geschafft. Du schaffst es auch jetzt.','Das Gefühl ist schlimm, aber es geht vorbei. Atme langsam.','Ich hab dich lieb. Ruf mich an, wenn du mich brauchst.','Denk an … (etwas, worauf du dich freust).','Du bist nicht allein. Ich bin für dich da.'];
+VIEWS.voice=()=>`${topbar('Stimme zum Festhalten')}
+  <p class="muted">${sv('Nimm eine Nachricht an dich selbst auf, wenn es dir gut geht. Oder lass eine Vertrauensperson etwas für dich einsprechen. In schweren Momenten spielt Anker sie dir vor.','Nehmen Sie eine Nachricht an sich selbst auf, wenn es Ihnen gut geht. Oder lassen Sie eine Vertrauensperson etwas für Sie einsprechen. In schweren Momenten spielt Anker sie Ihnen vor.')}</p>
+  <div id="vlist" class="list"><div class="lrow news"><span class="lt"><span class="sub">Lade …</span></span></div></div>
+  <div class="card" id="vrec"><h3>Neue Aufnahme</h3>
+    <div class="field"><label for="v-by">Wer spricht?</label><input id="v-by" maxlength="40" placeholder="z. B. Ich, Mama, Jonas"></div>
+    <details><summary class="small">Ideen, was man sagen kann</summary><ul class="small" style="margin-top:8px">${VOICE_IDEAS.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>
+    <div data-recui><button class="danger wide" data-a="v-rec">● Aufnahme starten</button></div>
+    <p class="small muted">Höchstens 60 Sekunden. Die Aufnahme bleibt nur auf diesem Handy.</p></div>`;
+async function renderVoiceList(){
+  const box=$('#vlist');if(!box)return;const a=await syncVoiceCount();
+  box.innerHTML=a.length?a.map(r=>`<div class="lrow news"><span class="lt"><b>${esc(r.by||'Aufnahme')}</b><span class="sub">${fmtDate(r.t)} · ${Math.round(r.sec||0)} Sek.</span></span>
+    <button class="iconbtn" data-a="v-play" data-i="${r.id}" aria-label="Abspielen">▶</button><button class="iconbtn" data-a="v-del" data-i="${r.id}">Löschen</button></div>`).join('')
+    :`<div class="lrow news"><span class="lt"><span class="sub">Noch keine Aufnahme.</span></span></div>`;
+}
+let RECT={};
+async function voiceRecord(){
+  const ui=$('[data-recui]');if(!ui)return;
+  if(!navigator.mediaDevices||!window.MediaRecorder){ui.innerHTML=`<p class="small" style="color:var(--alarm)">Aufnehmen geht auf diesem Gerät leider nicht.</p>`;return}
+  let p;try{p=REC.start()}catch(e){p=null}
+  try{await new Promise((ok,bad)=>{const c=setInterval(()=>{if(REC.mr&&REC.mr.state==='recording'){clearInterval(c);ok()}},100);setTimeout(()=>{clearInterval(c);bad()},8000);if(p)p.catch(bad)})}
+  catch(e){ui.innerHTML=`<p class="small" style="color:var(--alarm)">Das Mikrofon ist nicht erlaubt. Bitte erlaube den Zugriff und versuche es noch einmal.</p><button class="danger wide" data-a="v-rec">● Nochmal versuchen</button>`;return}
+  RECT={start:Date.now()};
+  ui.innerHTML=`<div class="recdot"><i></i><span data-sec>0:00</span></div><button class="wide" data-a="v-stop">■ Aufnahme beenden</button>`;
+  RECT.id=every(()=>{const s=Math.floor((Date.now()-RECT.start)/1000);const e=$('[data-sec]');if(e)e.textContent=`0:${String(s).padStart(2,'0')}`;if(s>=60)voiceStop()},250);
+  p.then(blob=>{RECT.blob=blob;RECT.sec=(Date.now()-RECT.start)/1000;const u=$('[data-recui]');if(!u)return;
+    u.innerHTML=`<p>Aufnahme fertig (${Math.round(RECT.sec)} Sek.).</p><div class="row"><button class="soft" style="flex:1" data-a="v-preview">▶ Anhören</button><button style="flex:1" data-a="v-save">Speichern</button></div><button class="ghost wide" data-a="v-rec">Neu aufnehmen</button>`});
+}
+function voiceStop(){clearInterval(RECT.id);REC.stop()}
+async function voiceSave(){if(!RECT.blob)return;const by=($('#v-by')&&$('#v-by').value.trim())||'Ich';
+  try{await IDB.put({id:'v'+Date.now(),t:Date.now(),by,sec:RECT.sec,mime:RECT.blob.type,blob:RECT.blob})}catch(e){const u=$('[data-recui]');if(u)u.innerHTML='<p class="small" style="color:var(--alarm)">Speichern hat nicht geklappt.</p>';return}
+  RECT={};render()}
+/* Abspielen im Hilfe-Dialog */
+async function voiceInFlow(){
+  const a=await IDB.all();if(!a.length)return;
+  const r=a[Math.floor(Math.random()*a.length)];
+  await bot(sv(`Hier ist eine Nachricht für dich${r.by&&r.by!=='Ich'?' von '+esc(r.by):''}. Magst du sie hören?`,`Hier ist eine Nachricht für Sie${r.by&&r.by!=='Ich'?' von '+esc(r.by):''}. Möchten Sie sie hören?`));
+  const yes=await ask([{label:'▶ Anhören',v:true},{label:sv('Jetzt nicht','Jetzt nicht'),v:false}]);
+  if(!yes)return;
+  const box=exBox();box.innerHTML=`<div class="recdot play"><i></i><span>${esc(r.by||'Aufnahme')}</span></div><button class="ghost" data-stop>Weiter</button>`;
+  await new Promise(res=>{let done=false;const fin=()=>{if(done)return;done=true;REC.stopPlay();box.innerHTML=`<p>▶ ${esc(r.by||'Aufnahme')} ✓</p>`;res()};
+    box.querySelector('[data-stop]').onclick=fin;REC.play(r.blob,fin)});
+}
+
+/* ---- Bitte um Anruf ---- */
+function callMeText(){return `${S.name?'Hier ist '+S.name+'. ':''}Mir geht es gerade nicht gut. Kannst du mich bitte anrufen, wenn du kurz Zeit hast? (gesendet mit Anker)`}
+function sendCallMe(c){const msg=callMeText();
+  if(c.how==='wa'){if(NATIVE){nat('openUrl',waLink(c,msg));return 'wa-open'}return 'wa'}
+  if(NATIVE&&nat('sendSms',c.num,msg)===true)return 'sent';return 'link'}
+function callMeResult(c,r){const msg=callMeText();
+  if(r==='sent')return `<div class="status ok">${sv(`Bitte an ${esc(c.name)} geschickt. Bleib in der Nähe deines Handys.`,`Bitte an ${esc(c.name)} geschickt. Bleiben Sie in der Nähe Ihres Handys.`)}</div>`;
+  if(r==='wa-open')return `<div class="status wait">WhatsApp ist geöffnet. Tippe dort auf Senden.</div>`;
+  return `<div class="status wait"><div>Nachricht an ${esc(c.name)} ist vorbereitet.</div><div class="row" style="margin-top:8px"><a class="btn soft" style="flex:1" href="${smsLink(c,msg)}">SMS öffnen</a><a class="btn soft" style="flex:1" href="${waLink(c,msg)}" target="_blank" rel="noopener">WhatsApp</a></div></div>`}
+VIEWS.callme=()=>`${topbar('Bitte um Anruf')}
+  <p>${sv('Wenn es zu viel wird, musst du nicht selbst anrufen. Tipp auf eine Person, dann bekommt sie diese Nachricht:','Wenn es zu viel wird, müssen Sie nicht selbst anrufen. Tippen Sie auf eine Person, dann bekommt sie diese Nachricht:')}</p>
+  <p class="quote small">${esc(callMeText())}</p>
+  ${S.contacts.length?`<div class="stack" id="cm">${S.contacts.map((c,i)=>`<button class="choice" data-a="callme-send" data-i="${i}">${ICON.phone}<span><b>${esc(c.name)}</b> <span class="small muted">${esc(c.num)}</span></span></button>`).join('')}</div><div id="cm-res" class="stack"></div>`
+    :`<div class="note">Du hast noch keine Vertrauensperson eingetragen.<button class="ghost wide" style="margin-top:8px" data-a="go" data-v="settings">Jetzt eintragen</button></div>`}
+  <p class="small muted">${sv('Das ist kein Notfall-Alarm. Bei Lebensgefahr ruf 112.','Das ist kein Notfall-Alarm. Bei Lebensgefahr rufen Sie 112.')}</p>`;
+
+/* ---- Was passiert in meinem Körper? ---- */
+const BODY=[
+ ['Herzrasen','Dein Körper schüttet Adrenalin aus, wie bei einem Alarm. Das Herz schlägt schneller, damit Muskeln mehr Blut bekommen. Das ist anstrengend, aber ein gesundes Herz hält das gut aus.'],
+ ['Atemnot, Luft bleibt weg','In Panik atmet man oft schnell und flach. Dann fühlt es sich an, als bekäme man zu wenig Luft, obwohl genug da ist. Langsames Ausatmen hilft am meisten.'],
+ ['Schwindel, alles dreht sich','Schnelles Atmen verändert kurz das Gleichgewicht der Gase im Blut. Das macht schwindelig oder benommen. Wird die Atmung ruhiger, lässt der Schwindel nach.'],
+ ['Kribbeln in Händen oder Lippen','Auch das kommt meist vom schnellen Atmen. Es ist harmlos und verschwindet wieder.'],
+ ['Zittern und Schwitzen','Die Muskeln sind auf Flucht eingestellt und voller Spannung. Zittern ist der Körper, der diese Energie wieder abbaut.'],
+ ['Alles wirkt unwirklich','Bei starker Angst schaltet das Gehirn manchmal auf Abstand. Das fühlt sich seltsam an, ist aber ein Schutzmechanismus und geht vorbei.'],
+ ['„Ich werde verrückt“ oder „Ich sterbe“','Diese Gedanken gehören zur Panik dazu. Sie fühlen sich sehr echt an, sind aber ein Symptom der Angst, keine Vorhersage.']];
+VIEWS.body=()=>`${topbar('Mein Körper bei Angst')}
+  <div class="banner"><p><b>${sv('Panik ist sehr unangenehm, aber nicht gefährlich.','Panik ist sehr unangenehm, aber nicht gefährlich.')}</b> ${sv('Sie wird meist nach etwa 10 Minuten am stärksten und klingt dann von selbst wieder ab.','Sie wird meist nach etwa 10 Minuten am stärksten und klingt dann von selbst wieder ab.')}</p></div>
+  <div class="list">${BODY.map(([h,tx])=>`<details class="lrow news acc"><summary><b>${h}</b></summary><p class="small">${tx}</p></details>`).join('')}</div>
+  <div class="note">Wenn du unsicher bist, ob etwas körperlich nicht stimmt, zum Beispiel bei starken Brustschmerzen zum ersten Mal, Ohnmacht oder Lähmung: ruf <b>112</b>. Lass Beschwerden auch von einer Ärztin oder einem Arzt abklären.</div>
+  <button class="wide" data-a="ex" data-v="atem">Jetzt ruhig atmen</button>`;
+
+/* ---- Beruhigende Klänge (ohne Internet erzeugt) ---- */
+const SOUND={ctx:null,nodes:[],cur:'',
+  noise(type){const c=this.ctx,len=c.sampleRate*4,b=c.createBuffer(1,len,c.sampleRate),d=b.getChannelData(0);let last=0;
+    for(let i=0;i<len;i++){const w=Math.random()*2-1;if(type==='brown'){last=(last+0.02*w)/1.02;d[i]=last*3.5}else d[i]=w}
+    const s=c.createBufferSource();s.buffer=b;s.loop=true;return s},
+  play(kind){this.stop(true);if(!kind)return;
+    try{this.ctx=this.ctx||new (window.AudioContext||window.webkitAudioContext)()}catch(e){return}
+    const c=this.ctx;c.resume&&c.resume();const out=c.createGain();out.gain.value=0;out.connect(c.destination);
+    const N=[out];const lfo=(freq,depth,target,base)=>{const o=c.createOscillator();o.frequency.value=freq;const g=c.createGain();g.gain.value=depth;o.connect(g);g.connect(target);target.value=base;o.start();N.push(o,g)};
+    if(kind==='regen'){const s=this.noise('white');const hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=900;const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=7000;const g=c.createGain();g.gain.value=.22;s.connect(hp);hp.connect(lp);lp.connect(g);g.connect(out);s.start();N.push(s,hp,lp,g)}
+    if(kind==='meer'){const s=this.noise('brown');const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=700;const g=c.createGain();s.connect(lp);lp.connect(g);g.connect(out);s.start();lfo(.09,.32,g.gain,.38);N.push(s,lp,g)}
+    if(kind==='wind'){const s=this.noise('brown');const bp=c.createBiquadFilter();bp.type='bandpass';bp.Q.value=.9;const g=c.createGain();g.gain.value=.9;s.connect(bp);bp.connect(g);g.connect(out);s.start();lfo(.06,260,bp.frequency,520);N.push(s,bp,g)}
+    out.gain.setTargetAtTime(.9,c.currentTime,1.2);this.nodes=N;this.cur=kind;this.sync()},
+  stop(quick){const c=this.ctx,N=this.nodes;this.nodes=[];this.cur='';
+    if(c&&N.length){N[0].gain.setTargetAtTime(0,c.currentTime,quick?.05:.4);setTimeout(()=>N.forEach(n=>{try{n.stop&&n.stop()}catch(e){}try{n.disconnect()}catch(e){}}),quick?200:1500)}this.sync()},
+  sync(){document.querySelectorAll('[data-snd]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.snd===this.cur))}};
+const SOUNDS=[['regen','🌧','Regen'],['meer','🌊','Meer'],['wind','🍃','Wind']];
+function soundBar(){return `<div class="sndbar" role="group" aria-label="Klänge">${SOUNDS.map(([k,e,n])=>`<button class="iconbtn" data-snd="${k}" aria-pressed="${SOUND.cur===k}">${e} ${n}</button>`).join('')}</div>`}
+VIEWS.sounds=()=>`${topbar('Beruhigende Klänge')}
+  <p class="muted">${sv('Such dir einen Klang aus. Am schönsten mit Kopfhörern. Tipp nochmal drauf, um ihn auszuschalten.','Wählen Sie einen Klang. Am schönsten mit Kopfhörern. Nochmal tippen schaltet ihn aus.')}</p>
+  <div class="sndbig">${SOUNDS.map(([k,e,n])=>`<button class="tile" data-snd="${k}" aria-pressed="${SOUND.cur===k}"><span style="font-size:2rem">${e}</span><div>${n}</div></button>`).join('')}</div>
+  <p class="small muted">${sv('Der Klang läuft weiter, bis du ihn ausschaltest oder die Seite verlässt.','Der Klang läuft, bis Sie ihn ausschalten oder die Seite verlassen.')}</p>
+  <button class="soft wide" data-a="ex" data-v="atem">Dazu atmen</button>`;
+document.addEventListener('click',e=>{const b=e.target.closest('[data-snd]');if(!b)return;const k=b.dataset.snd;if(SOUND.cur===k)SOUND.stop();else SOUND.play(k);SOUND.keep=V.name});
+
+/* ---- Unterwegs-Modus ---- */
+function vibrate(p){const a=Array.isArray(p)?p:[p];if(nat('vibratePattern',a.join(','))===true)return;try{navigator.vibrate&&navigator.vibrate(a)}catch(e){}}
+function speakNow(tx){const o=S.voice;S.voice=true;speak(tx);S.voice=o}
+VIEWS.onthego=()=>`<div class="quiet stack">${topbar('Unterwegs')}
+  <p class="muted">${sv('Übungen, die keiner bemerkt. Für Bus, Schule, Arbeit oder Supermarkt.','Übungen, die niemand bemerkt. Für Bus, Arbeit oder Supermarkt.')}</p>
+  ${V.og?`<div class="exbox" id="og"></div>`:`<div class="list">
+    ${lrow('og','vib',ICON.breath,'Atmen nur mit Vibration','Handy in die Hand oder Tasche, Bildschirm dunkel')}
+    ${lrow('og','press',ICON.steps,'Zehen und Hände drücken','Unsichtbar Spannung abbauen')}
+    ${lrow('og','color',ICON.eye,'Farben suchen','Dinge in einer Farbe zählen')}
+    ${lrow('og','ear',ICON.talk,'Mit Kopfhörern atmen','Anker spricht leise mit dir')}</div>`}</div>`;
+const OG={};
+OG.vib=(box,res)=>{let r=0,ended=false;const R=8;
+  box.innerHTML=`<div class="dark"><p>Einatmen, solange es pulsiert.<br>Ausatmen, wenn es still ist.</p><p class="small" data-c></p><button class="ghost" data-end>Fertig</button></div>`;
+  box.querySelector('[data-end]').onclick=()=>{ended=true;res()};keepAwake(true);
+  const cyc=()=>{if(ended)return;r++;if(r>R){ended=true;return res()}box.querySelector('[data-c]').textContent=`Runde ${r} von ${R}`;vibrate([250,750,250,750,250,750,250]);later(cyc,10000)};later(cyc,600)};
+OG.press=(box,res)=>{const st=[['Drück die Zehen fest in den Boden.',5],['Loslassen. Spür, wie es warm wird.',8],['Drück die Hände zusammen oder balle sie in der Tasche zur Faust.',5],['Loslassen. Schultern sinken lassen.',8],['Drück die Oberschenkel fest auf den Sitz oder spann die Beine an.',5],['Loslassen. Atme einmal langsam aus.',8]];let i=0,left=st[0][1],ended=false;
+  const draw=()=>{box.innerHTML=`<p class="small muted">${i+1} von ${st.length}</p><p class="ogtxt">${st[i][0]}</p><div class="big">${left}</div><button class="ghost" data-end>Fertig</button>`;box.querySelector('[data-end]').onclick=()=>{ended=true;res()}};
+  draw();vibrate(80);const id=every(()=>{if(ended)return clearInterval(id);left--;if(left<=0){i++;if(i>=st.length){clearInterval(id);ended=true;return res()}left=st[i][1];vibrate(80)}draw()},1000)};
+OG.color=(box,res)=>{const cols=shuffle([['Blau','#3D6FD1'],['Rot','#C9463D'],['Grün','#3B8A4B'],['Gelb','#D9A21B'],['Weiß','#E8E8E8'],['Schwarz','#222']]).slice(0,3);let ci=0,n=0;const need=5;
+  const draw=()=>{const [c,h]=cols[ci];box.innerHTML=`<p class="small muted">Farbe ${ci+1} von 3</p><p class="ogtxt">Finde ${need} Dinge in <b>${c}</b> <span class="sw" style="background:${h}"></span></p>
+    <button class="tapcount" data-tap><span class="big">${n}</span><span class="small">Tippen, wenn du eins gefunden hast</span></button><button class="ghost" data-end>Fertig</button>`;
+    box.querySelector('[data-tap]').onclick=()=>{n++;vibrate(30);if(n>=need){ci++;n=0;if(ci>=3)return res()}draw()};box.querySelector('[data-end]').onclick=res};draw()};
+OG.ear=(box,res)=>{const ph=[['Einatmen',4],['Ausatmen',6]];let r=0,p=0,left=4,ended=false;const R=6;
+  box.innerHTML=`<p class="ogtxt" data-t>Setz die Kopfhörer auf.</p><p class="small muted" data-c></p><button class="ghost" data-end>Fertig</button>`;
+  box.querySelector('[data-end]').onclick=()=>{ended=true;stopSpeak();res()};keepAwake(true);
+  const step=()=>{if(ended)return;if(p===0){r++;if(r>R){ended=true;speakNow('Gut gemacht.');return res()}box.querySelector('[data-c]').textContent=`Runde ${r} von ${R}`}
+    const [w,d]=ph[p];box.querySelector('[data-t]').textContent=w;speakNow(w);p=(p+1)%2;later(step,d*1000)};
+  speakNow('Wir atmen zusammen. Einfach zuhören.');later(step,3500)};
+function runOG(){const box=$('#og');if(!box)return;OG[V.og](box,()=>{keepAwake(false);if(!$('#og'))return;markEx('og_'+V.og);box.innerHTML=`<p><b>Gut gemacht.</b></p><div class="row"><button style="flex:1" data-a="og" data-v="">Andere Übung</button><button class="ghost" style="flex:1" data-a="home">Zum Start</button></div>`})}
+
+/* ---- Gefühlsrad ---- */
+const FEEL=[
+ {k:'angst',e:'😨',n:'Angst',c:'#7A6FD1',w:['nervös','unsicher','panisch','besorgt','überfordert'],tip:['atem','g54321'],say:'Angst will dich beschützen. Sie ist gerade nur zu laut.'},
+ {k:'wut',e:'😠',n:'Wut',c:'#C9463D',w:['genervt','gereizt','wütend','ungerecht behandelt','eifersüchtig'],tip:['muskel','atem'],say:'Wut zeigt, dass dir etwas wichtig ist oder eine Grenze verletzt wurde.'},
+ {k:'traurig',e:'😢',n:'Traurig',c:'#3D6FD1',w:['enttäuscht','einsam','verletzt','vermisse jemanden','hoffnungslos'],tip:['traum','callme'],say:'Traurigkeit braucht Zeit und manchmal jemanden, der da ist.'},
+ {k:'scham',e:'😳',n:'Scham',c:'#D17FA4',w:['peinlich berührt','schuldig','nicht gut genug','ausgeschlossen','bloßgestellt'],tip:['thought','schublade'],say:'Scham fühlt sich an, als wäre man falsch. Du bist nicht falsch.'},
+ {k:'leer',e:'😶',n:'Leer',c:'#7D8B8E',w:['müde','gelangweilt','taub','abwesend','erschöpft'],tip:['bilder','g54321'],say:'Leere ist oft ein Zeichen, dass dir gerade alles zu viel war.'},
+ {k:'froh',e:'😊',n:'Gut',c:'#3B8A4B',w:['froh','stolz','ruhig','dankbar','verliebt'],tip:[],say:'Schön! Merk dir diesen Moment, er gehört dir.'}];
+const TIPNAME={atem:'Atmen',g54321:'5-4-3-2-1',muskel:'Anspannen & Loslassen',traum:'Traumreise',callme:'Bitte um Anruf',thought:'Gedanken-Check',schublade:'Meine Schublade',bilder:'Bilderraten'};
+VIEWS.feel=()=>{const f=FEEL.find(x=>x.k===V.f);
+  let b='';
+  if(!f)b=`<h1>${sv('Wie fühlst du dich gerade?','Wie fühlen Sie sich gerade?')}</h1><div class="feelgrid">${FEEL.map(x=>`<button class="feel" style="--fc:${x.c}" data-a="feel" data-v="${x.k}"><span>${x.e}</span>${x.n}</button>`).join('')}</div>
+    <p class="small muted">${sv('Es gibt kein richtig oder falsch. Gefühle zu benennen, macht sie oft schon ein bisschen kleiner.','Es gibt kein richtig oder falsch. Gefühle zu benennen, macht sie oft schon etwas kleiner.')}</p>`;
+  else if(!V.w)b=`<h1>${f.e} ${f.n}</h1><p>${sv('Welches Wort passt am besten?','Welches Wort passt am besten?')}</p><div class="chips big2">${f.w.map(w=>`<button class="choice" data-a="feel-w" data-v="${esc(w)}">${esc(w)}</button>`).join('')}</div><button class="ghost" data-a="feel" data-v="">Zurück</button>`;
+  else if(!V.n)b=`<h1>${f.e} ${esc(V.w)}</h1><p>${sv('Wie stark ist das Gefühl?','Wie stark ist das Gefühl?')}</p><div class="faces">${[1,2,3,4,5].map(n=>`<button data-a="feel-n" data-v="${n}" aria-label="${n} von 5" style="font-size:1.1rem">${n}</button>`).join('')}</div><div class="facelab"><span>ein bisschen</span><span>sehr stark</span></div>`;
+  else b=`<h1>${f.e} ${esc(V.w)} · ${V.n}/5</h1><div class="banner"><p>${f.say}</p></div>
+    ${f.tip.length?`<p>${sv('Das könnte jetzt helfen:','Das könnte jetzt helfen:')}</p>${f.tip.filter(k=>!HOMEEX.includes(k)||S.lang==='de').map(k=>k==='callme'||k==='thought'?`<button class="soft wide" data-a="go" data-v="${k}">${TIPNAME[k]}</button>`:`<button class="soft wide" data-a="ex" data-v="${k}">${TIPNAME[k]}</button>`).join('')}`:''}
+    <p class="small muted">Gespeichert im Tagebuch.</p><button class="ghost wide" data-a="home">Zum Start</button>`;
+  return `${topbar('Gefühle benennen')}${b}`};
+
+/* ---- Abzeichen ---- */
+function diaryWhat(w){return S.diary.filter(d=>d.what===w).length}
+function helpUsed(){return S.diary.filter(d=>d.ex&&d.ex.length).length}
+function exAll(k){return exCount(k)+S.diary.reduce((n,d)=>n+((d.ex||[]).filter(x=>x===k).length),0)}
+const BADGES=[
+ {k:'erster',e:'⚓',n:'Erster Anker',d:'Den Hilfe-Dialog einmal benutzt',p:()=>[helpUsed(),1]},
+ {k:'atem',e:'🌬',n:'Ruhiger Atem',d:'5-mal Atmen geübt',p:()=>[exAll('atem'),5]},
+ {k:'hier',e:'👀',n:'Im Hier und Jetzt',d:'5-mal 5-4-3-2-1 oder Bilderraten',p:()=>[exAll('g54321')+pc('bilder'),5]},
+ {k:'schublade',e:'🗄',n:'Ordnung im Kopf',d:'3-mal die Schublade geübt',p:()=>[pc('schublade'),3]},
+ {k:'traum',e:'🏝',n:'Traumreisend',d:'3 Traumreisen gemacht',p:()=>[pc('traum'),3]},
+ {k:'alle',e:'🌟',n:'Allrounder',d:'Alle Übungen für zu Hause freigeschaltet',p:()=>[HOMEEX.filter(k=>pc(k)>=UNLOCK).length,3]},
+ {k:'plan',e:'🛡',n:'Gut vorbereitet',d:'Notfallplan ausgefüllt und eine Vertrauensperson eingetragen',p:()=>[['signs','helps','safe','reasons'].filter(k=>S.plan[k]).length+(S.contacts.length?1:0),5]},
+ {k:'stimme',e:'🎙',n:'Mutmacher-Stimme',d:'Eine Sprachnachricht aufgenommen',p:()=>[S.voiceN||0,1]},
+ {k:'gefuehl',e:'🎨',n:'Gefühls-Profi',d:'5-mal ein Gefühl benannt',p:()=>[diaryWhat('gefuehl'),5]},
+ {k:'mut',e:'🦁',n:'Mutig',d:'3 kleine Schritte geschafft',p:()=>[Object.values(S.stepsDone).filter(Boolean).length,3]},
+ {k:'check',e:'📅',n:'Dranbleiben',d:'An 10 Tagen den Kurz-Check gemacht',p:()=>[S.checks.length,10]},
+ {k:'gespraech',e:'💬',n:'Gesprächsprofi',d:'3-mal Gespräche geübt',p:()=>[diaryWhat('training'),3]}];
+function earned(){return BADGES.filter(b=>{const [a,n]=b.p();return a>=n}).map(b=>b.k)}
+function newBadges(){const seen=S.badgesSeen||[];return earned().filter(k=>!seen.includes(k))}
+function badgeBanner(){const nb=newBadges();if(!nb.length)return '';const b=BADGES.find(x=>x.k===nb[0]);
+  return `<div class="banner badgebanner"><p><span style="font-size:1.6rem">${b.e}</span> <b>${nb.length>1?nb.length+' neue Abzeichen!':'Neues Abzeichen: '+b.n}</b><br><span class="small">${nb.length>1?'Schau sie dir an.':b.d}</span></p><div class="row"><button style="flex:1" data-a="go" data-v="badges">Ansehen</button><button class="ghost" data-a="badge-ok">OK</button></div></div>`}
+VIEWS.badges=()=>{const got=earned();
+  return `${topbar('Abzeichen')}<p class="muted">${sv(`Du hast ${got.length} von ${BADGES.length} gesammelt. Kein Stress, die kommen von allein, wenn du Anker benutzt.`,`Sie haben ${got.length} von ${BADGES.length} gesammelt. Ganz ohne Druck, sie kommen beim Benutzen von allein.`)}</p>
+  <div class="badgegrid">${BADGES.map(b=>{const [a,n]=b.p(),ok=a>=n;return `<div class="badge ${ok?'on':''}"><span class="be">${b.e}</span><b>${b.n}</b><span class="small muted">${b.d}</span>${ok?'':`<span class="small muted">${Math.min(a,n)} von ${n}</span>`}</div>`}).join('')}</div>`};
+
+/* ---- Daten sichern ---- */
+function blobToData(b){return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>res('');r.readAsDataURL(b)})}
+function dataToBlob(d){const [h,b64]=d.split(',');const mime=(h.match(/data:([^;]+)/)||[])[1]||'audio/webm';const bin=atob(b64);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:mime})}
+VIEWS.backup=()=>`${topbar('Daten sichern')}
+  <p class="muted">${sv('Alles, was du in Anker eingetragen hast, liegt nur auf diesem Handy. Mit einer Sicherung kannst du es auf ein neues Handy mitnehmen.','Alle Daten liegen nur auf diesem Gerät. Mit einer Sicherung können Sie sie auf ein neues Gerät mitnehmen.')}</p>
+  <div class="card"><h3>Sicherung erstellen</h3>
+    <label class="toggle"><input type="checkbox" id="b-voice" checked> Sprachaufnahmen mitsichern</label>
+    <button data-a="backup-make">Sicherungsdatei speichern</button>
+    <p class="small muted">Die Datei enthält Kontakte, Notfallplan und Tagebuch. Bewahre sie sicher auf und schick sie niemandem. PINs werden nicht mitgespeichert.</p></div>
+  <div class="card"><h3>Sicherung wiederherstellen</h3>
+    <p class="small">Ersetzt alle Daten auf diesem Handy durch die aus der Datei.</p>
+    <input type="file" id="b-file" accept=".json,application/json,text/plain" style="display:none">
+    <button class="soft" data-a="backup-pick">Sicherungsdatei auswählen</button></div>
+  <p id="b-msg" class="status" hidden></p>`;
+function bMsg(tx,ok){const m=$('#b-msg');if(!m)return;m.className='status '+(ok?'ok':'wait');m.textContent=tx;m.hidden=false}
+window.ankerSaved=ok=>bMsg(ok?'Sicherung gespeichert.':'Sicherung wurde nicht gespeichert.',ok);
+async function backupMake(){
+  const withVoice=$('#b-voice')&&$('#b-voice').checked;const data=clone(S);delete data.pin;delete data.diaryPin;
+  const out={app:'anker',version:APP_VERSION,date:new Date().toISOString(),data,voice:[]};
+  if(withVoice){for(const r of await IDB.all())out.voice.push({id:r.id,t:r.t,by:r.by,sec:r.sec,data:await blobToData(r.blob)})}
+  const json=JSON.stringify(out),name=`anker-sicherung-${dayKey()}.json`;
+  if(NATIVE&&typeof AnkerNative.saveFile==='function'){nat('saveFile',name,json);return}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([json],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
+  bMsg('Die Sicherung wurde heruntergeladen.',true)}
+function backupPick(){const f=$('#b-file');if(!f)return;f.onchange=()=>{const file=f.files&&f.files[0];if(!file)return;const r=new FileReader();r.onload=()=>backupAsk(String(r.result));r.readAsText(file)};f.click()}
+let BPEND=null;
+function backupAsk(txt){let o;try{o=JSON.parse(txt)}catch(e){o=null}
+  if(!o||o.app!=='anker'||!o.data){bMsg('Das ist keine Anker-Sicherung.',false);return}
+  BPEND=o;const m=$('#b-msg');m.className='status wait';m.hidden=false;
+  m.innerHTML=`<b>Sicherung vom ${fmtDate(o.date)}</b> gefunden (${(o.data.contacts||[]).length} Kontakte, ${(o.data.diary||[]).length} Tagebuch-Einträge${o.voice&&o.voice.length?', '+o.voice.length+' Aufnahmen':''}).<br>Alle aktuellen Daten werden ersetzt.<div class="row" style="margin-top:8px"><button class="danger" style="flex:1" data-a="backup-restore">Wiederherstellen</button><button class="ghost" data-a="go" data-v="backup">Abbrechen</button></div>`}
+async function backupRestore(){const o=BPEND;if(!o)return;const pin=S.pin,dpin=S.diaryPin;
+  S=Object.assign(clone(DEF),o.data);S.pin=pin;S.diaryPin=dpin;S.timer=null;S.setup=true;save();
+  if(o.voice&&o.voice.length){await IDB.clear();for(const r of o.voice){try{await IDB.put({id:r.id,t:r.t,by:r.by,sec:r.sec,blob:dataToBlob(r.data)})}catch(e){}}}
+  await syncVoiceCount();nat('cancelTimer');nat('setReminder',!!S.remind,S.remindHour);nat('setDiscreet',!!S.discreet);BPEND=null;
+  go('home');}
+
+/* ---- Feedback ---- */
+const REPO='https://github.com/anker-hilfe/anker-app';
+VIEWS.feedback=()=>`${topbar('Feedback geben')}
+  <p class="muted">Hast du eine Idee oder einen Fehler gefunden? Das hilft, Anker besser zu machen.</p>
+  <div class="card"><div class="field"><label for="fb-type">Worum geht es?</label><select id="fb-type"><option>Idee</option><option>Fehler</option><option>Frage</option><option>Sonstiges</option></select></div>
+  <div class="field"><label for="fb-text">Deine Nachricht</label><textarea id="fb-text" rows="5" placeholder="z. B. Bei der Traumreise wäre Musik schön …"></textarea></div>
+  <p id="fb-err" class="small" style="color:var(--alarm)" hidden>Bitte schreib kurz etwas.</p>
+  <button data-a="fb-send">Auf GitHub senden</button><button class="ghost" data-a="fb-copy">Nur Text kopieren</button>
+  <p id="fb-msg" class="small muted" hidden></p></div>
+  <div class="note">Der Eintrag auf GitHub ist <b>öffentlich</b>. Schreib bitte keine Namen, Telefonnummern oder persönlichen Erlebnisse hinein. Zum Senden brauchst du ein kostenloses GitHub-Konto.</div>`;
+function fbData(){const ty=$('#fb-type').value,tx=$('#fb-text').value.trim();if(!tx){$('#fb-err').hidden=false;return null}
+  return {title:`[${ty}] ${tx.split('\n')[0].slice(0,60)}`,body:`${tx}\n\n---\nAnker ${APP_VERSION} · ${NATIVE?'Android-App':'Browser'} · ${S.age==='kind'?'Kind':S.age==='jugend'?'Jugendlich':'Erwachsen'} · ${S.tone==='kumpel'?'Kumpel':'Professionell'}`,ty}}
+
+/* ---- Darstellung ---- */
+function applyLook(){const r=document.documentElement;if(S.theme==='light'||S.theme==='dark')r.dataset.theme=S.theme;else delete r.dataset.theme;
+  const z={1:'',2:'1.12',3:'1.25'}[S.fontSize||1]||'';r.style.zoom=z;}
 
 /* ============ Start ============ */
 (function boot(){

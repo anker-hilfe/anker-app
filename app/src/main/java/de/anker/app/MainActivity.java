@@ -16,11 +16,16 @@ import android.print.PrintManager;
 import android.speech.tts.TextToSpeech;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import android.webkit.PermissionRequest;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -30,6 +35,10 @@ public class MainActivity extends Activity {
     private TextToSpeech tts;
     private boolean ttsReady = false;
     private String launch = "";
+    private ValueCallback<Uri[]> fileCallback;
+    private PermissionRequest pendingPermission;
+    private String pendingSave;
+    static final int REQ_FILE = 21, REQ_SAVE = 22, REQ_MIC = 23;
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override
@@ -44,6 +53,7 @@ public class MainActivity extends Activity {
         s.setDomStorageEnabled(true);
         s.setAllowFileAccess(true);
         s.setTextZoom(100);
+        s.setMediaPlaybackRequiresUserGesture(false);
 
         web.addJavascriptInterface(new Bridge(this), "AnkerNative");
         web.setWebViewClient(new WebViewClient() {
@@ -52,6 +62,37 @@ public class MainActivity extends Activity {
                 String url = request.getUrl().toString();
                 if (url.startsWith("file:")) return false;
                 openExternal(url);
+                return true;
+            }
+        });
+        web.setWebChromeClient(new WebChromeClient() {
+            // Mikrofon für "Stimme zum Festhalten"
+            @Override
+            public void onPermissionRequest(PermissionRequest request) {
+                runOnUiThread(() -> {
+                    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                        request.grant(request.getResources());
+                    } else {
+                        pendingPermission = request;
+                        requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, REQ_MIC);
+                    }
+                });
+            }
+
+            // Datei auswählen für "Daten wiederherstellen"
+            @Override
+            public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
+                if (fileCallback != null) fileCallback.onReceiveValue(null);
+                fileCallback = callback;
+                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+                i.addCategory(Intent.CATEGORY_OPENABLE);
+                i.setType("*/*");
+                try {
+                    startActivityForResult(Intent.createChooser(i, "Sicherung auswählen"), REQ_FILE);
+                } catch (Exception e) {
+                    fileCallback = null;
+                    return false;
+                }
                 return true;
             }
         });
@@ -89,6 +130,40 @@ public class MainActivity extends Activity {
             if (checkSelfPermission(p) != PackageManager.PERMISSION_GRANTED) missing.add(p);
         }
         if (!missing.isEmpty()) requestPermissions(missing.toArray(new String[0]), 1);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+        super.onRequestPermissionsResult(requestCode, permissions, results);
+        if (requestCode == REQ_MIC && pendingPermission != null) {
+            if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
+                pendingPermission.grant(pendingPermission.getResources());
+            } else {
+                pendingPermission.deny();
+            }
+            pendingPermission = null;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_FILE && fileCallback != null) {
+            Uri uri = (resultCode == RESULT_OK && data != null) ? data.getData() : null;
+            fileCallback.onReceiveValue(uri != null ? new Uri[]{uri} : null);
+            fileCallback = null;
+        }
+        if (requestCode == REQ_SAVE) {
+            boolean ok = false;
+            if (resultCode == RESULT_OK && data != null && data.getData() != null && pendingSave != null) {
+                try (OutputStream out = getContentResolver().openOutputStream(data.getData())) {
+                    out.write(pendingSave.getBytes(StandardCharsets.UTF_8));
+                    ok = true;
+                } catch (Exception ignored) { }
+            }
+            pendingSave = null;
+            web.evaluateJavascript("window.ankerSaved && window.ankerSaved(" + ok + ")", null);
+        }
     }
 
     void openExternal(String url) {
@@ -221,6 +296,24 @@ public class MainActivity extends Activity {
                 i.putExtra(Intent.EXTRA_SUBJECT, "Anker-Bericht");
                 i.putExtra(Intent.EXTRA_TEXT, text);
                 startActivity(Intent.createChooser(i, "Bericht teilen"));
+            });
+        }
+
+        /** Sicherung als Datei speichern (Nutzer wählt den Ort). */
+        @JavascriptInterface
+        public void saveFile(String name, String content) {
+            runOnUiThread(() -> {
+                pendingSave = content;
+                Intent i = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                i.addCategory(Intent.CATEGORY_OPENABLE);
+                i.setType("application/json");
+                i.putExtra(Intent.EXTRA_TITLE, name);
+                try {
+                    startActivityForResult(i, REQ_SAVE);
+                } catch (Exception e) {
+                    pendingSave = null;
+                    web.evaluateJavascript("window.ankerSaved && window.ankerSaved(false)", null);
+                }
             });
         }
 

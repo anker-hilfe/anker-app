@@ -17,6 +17,10 @@ Hilfe-App für Kinder, Jugendliche und Erwachsene bei Panik, Anspannung und Leer
 - Notfallplan, Skills-Box, Tagebuch, Bericht als PDF für Therapie und Arzt
 - Üben zu Hause: Meine Schublade, Traumreise und Bilderraten. Nach 3 Übungsrunden schlägt Anker sie auch in akuten Momenten vor
 - Gesprächs-Training, Gedanken-Check, Kleine Schritte
+- Stimme zum Festhalten (eigene Sprachnachrichten, im Notfall abgespielt) und „Bitte um Anruf“ an Vertrauenspersonen
+- Unterwegs-Modus mit unauffälligen Übungen, beruhigende Klänge (offline), „Mein Körper bei Angst“, Gefühle benennen
+- Abzeichen, Daten sichern und wiederherstellen, Feedback über GitHub-Issues
+- Tagebuch-PIN, Schriftgröße und Hell/Dunkel einstellbar
 - Infoseiten für Vertrauenspersonen und Eltern
 - Sprachen für die Notfallhilfe: Deutsch, Englisch, Türkisch, Arabisch, Ukrainisch
 - „Was ist neu?“-Hinweis nach jedem Update (neue Einträge oben in `CHANGELOG` in index.html)
