@@ -98,6 +98,24 @@ textarea{min-height:84px;resize:vertical}
 .chips{display:flex;flex-wrap:wrap;gap:6px}.chips span{background:var(--accent-soft);padding:4px 10px;border-radius:99px;font-size:.9rem}
 .dots{display:flex;gap:8px}.dots i{width:14px;height:14px;border-radius:50%;background:var(--line)}.dots i.on{background:var(--accent)}
 .big{font-family:var(--f-display);font-size:3rem;font-weight:600;font-variant-numeric:tabular-nums;text-align:center;direction:ltr}
+/* Startseite mit Reitern */
+.sect{font-size:1.1rem;margin-top:6px}
+.list{background:var(--surface);border-radius:var(--r);display:flex;flex-direction:column;overflow:hidden}
+.lrow{background:transparent;color:var(--ink);border-radius:0;justify-content:flex-start;text-align:start;gap:14px;padding:14px 16px;min-height:64px;font-weight:400;border-top:1px solid var(--line)}
+.lrow:first-child{border-top:0}
+.lrow>svg{width:26px;height:26px;color:var(--accent);flex:none}
+.lrow .lt{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.lrow .lt b{font-family:var(--f-display);font-weight:500}
+.lrow .sub{font-family:var(--f-body);font-size:.85rem;color:var(--muted)}
+.lrow .end{color:var(--muted);font-size:1.3rem;flex:none}
+.lrow .unl{color:var(--ok);font-weight:600;font-size:.85rem}
+.lrow .meter{margin:0}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:center;gap:4px;background:var(--surface);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px))}
+.tabbar button{flex:1;max-width:170px;background:transparent;color:var(--muted);flex-direction:column;gap:2px;padding:6px 4px;min-height:56px;font-size:.8rem;border-radius:12px}
+.tabbar button svg{width:24px;height:24px}
+.tabbar button[aria-current="page"]{color:var(--accent);background:var(--accent-soft);font-weight:600}
+.tabspace{height:64px}
+@media print{.tabbar,.tabspace{display:none}}
 /* Üben zu Hause */
 .sechead{display:flex;flex-direction:column;gap:4px;margin-top:4px}
 .tile .unl{color:var(--ok);font-weight:600}
@@ -389,6 +407,7 @@ const ICON={
  drawer:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 12h18M10 8h4M10 16h4"/></svg>',
  sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18h20M5 18a7 7 0 0 1 14 0"/><path d="M12 5V3M5.6 8.6 4.2 7.2M18.4 8.6l1.4-1.4M7 21h10"/></svg>',
  image:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>',
+ calc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/></svg>',
  lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
  phone:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2"/></svg>',
  gear:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>'
@@ -411,7 +430,7 @@ function go(name,params={}){
   if(name==='home'&&!S.setup)name='setup';
   if(S.pin&&!UNLOCKED&&!OPEN_WHEN_LOCKED.includes(name)){params={next:name};name='lock'}
   GEN++;clearTimers();stopSpeak();keepAwake(false);V=Object.assign({name},params);render();window.scrollTo(0,0)}
-window.ankerBack=function(){if(V.name==='home'||V.name==='setup'||V.name==='lock')return 'false';if(V.name==='alarm'&&V.phase==='count'){cancelAlarm();return 'true'}go('home');return 'true'};
+window.ankerBack=function(){if(V.name==='home'&&HOMETAB!=='hilfe'){HOMETAB='hilfe';render();return 'true'}if(V.name==='home'||V.name==='setup'||V.name==='lock')return 'false';if(V.name==='alarm'&&V.phase==='count'){cancelAlarm();return 'true'}go('home');return 'true'};
 window.ankerLaunch=function(w){if(w==='hilfe')go(S.setup?'help':'setup');else if(w==='check'||w==='')go('home');else if(w==='zeigen')go('card');else if(w==='helfer')go('helfer')};
 
 function topbar(title,back=true){
@@ -505,34 +524,56 @@ function trendCard(){
 }
 
 /* ---- Start ---- */
+let HOMETAB='hilfe';
+function lrow(a,vv,icon,title,sub,end){return `<button class="lrow" data-a="${a}" ${vv?`data-v="${vv}"`:''}>${icon}<span class="lt"><b>${title}</b>${sub?`<span class="sub">${sub}</span>`:''}</span><span class="end">${end??'›'}</span></button>`}
+function meterHTML(k){const n=pc(k);return n>=UNLOCK?`<span class="unl">✓ Notfall</span>`:`<span class="meter" aria-label="${n} von ${UNLOCK} geübt">${Array.from({length:UNLOCK},(_,i)=>`<i class="${i<n?'on':''}"></i>`).join('')}</span>`}
 VIEWS.home=()=>{
-  const tm=S.timer&&S.timer.until>Date.now()?S.timer:null;
   const de=S.lang==='de';
+  const tabs=[['hilfe',ICON.anchor,de?'Hilfe':'Help'],['ueben',ICON.sun,de?'Üben':'Practice'],['plan',ICON.plan,de?'Mein Plan':'My plan']];
+  const bar=`<nav class="tabbar noprint" aria-label="Bereiche">${tabs.map(([k,ic,l])=>`<button data-a="tab" data-v="${k}" ${HOMETAB===k?'aria-current="page"':''}>${ic}<span>${l}</span></button>`).join('')}</nav><div class="tabspace"></div>`;
+  const top=`<div class="top"><div class="brand">${ICON.anchor}${S.discreet?'':'Anker'}</div><button class="iconbtn" data-a="go" data-v="settings" aria-label="Einstellungen">${ICON.gear}</button></div>`;
+  const tm=S.timer&&S.timer.until>Date.now()?S.timer:null;
+  const timerBanner=tm?`<div class="banner"><p><b>Melde-dich-Timer läuft</b> bis ${fmtTime(tm.until)} Uhr. Danach werden ${esc(tm.names)} benachrichtigt.</p><div class="row"><button style="flex:1" data-a="timer-stop">Ich bin sicher, stoppen</button><button class="ghost" data-a="timer-add">+15 Min.</button></div></div>`:'';
   const tile=(a,vv,icon,title,sub)=>`<button class="tile" data-a="${a}" ${vv?`data-v="${vv}"`:''}>${icon}<div>${title}${sub?`<br><span class="sub">${sub}</span>`:''}</div></button>`;
-  return `<div class="top"><div class="brand">${ICON.anchor}${S.discreet?'':'Anker'}</div><button class="iconbtn" data-a="go" data-v="settings" aria-label="Einstellungen">${ICON.gear}</button></div>
-  ${tm?`<div class="banner"><p><b>Melde-dich-Timer läuft</b> bis ${fmtTime(tm.until)} Uhr. Danach werden ${esc(tm.names)} benachrichtigt.</p><div class="row"><button style="flex:1" data-a="timer-stop">Ich bin sicher, stoppen</button><button class="ghost" data-a="timer-add">+15 Min.</button></div></div>`:''}
+  let body='';
+  if(HOMETAB==='hilfe') body=`${timerBanner}
   <div class="stack"><h1>${t('hello',S.name?nm():'')}</h1><p class="muted">${t('helloSub')}</p></div>
   <button class="sos" data-a="help">${t('sosTitle')}<small>${t('sosSub')}</small></button>
   ${trendCard()}
   ${checkCard()}
+  <h2 class="sect">${de?'Schnelle Hilfe':'Quick help'}</h2>
   <div class="grid">
     ${tile('ex','atem',ICON.breath,t('t_atem'),t('t_atemSub'))}
     ${tile('ex','g54321',ICON.eye,'5-4-3-2-1',t('t_54321Sub'))}
     ${tile('go','card',ICON.card,t('t_card'),t('t_cardSub'))}
     ${tile('go','timer',ICON.clock,t('t_timer'),de?'Für den Heimweg':'')}
-    ${tile('go','skills',ICON.box,t('t_skills'),de?'Was mir hilft':'')}
-    ${tile('go','plan',ICON.plan,t('t_plan'),de?'Meine Sätze':'')}
-    ${tile('go','train',ICON.talk,t('t_train'),de?'Üben ohne Druck':'')}
-    ${tile('go','thought',ICON.bulb,t('t_thought'),de?'Angstgedanken prüfen':'')}
-    ${tile('go','steps',ICON.steps,t('t_steps'),de?'Unter Leute kommen':'')}
-    ${tile('go','diary',ICON.book,t('t_diary'),de?`${S.diary.length} Einträge`:'')}
-    ${tile('go','report',ICON.chart,t('t_report'),de?'Für Therapie & Arzt':'')}
-    ${minor()?tile('go','eltern',ICON.plan,'Für Eltern',de?'So helft ihr':''):tile('go','helfer',ICON.plan,'Für Helfer',de?'Info für Vertraute':'')}
   </div>
-  ${homePractice()}
-  ${!de?`<p class="small muted">${t('deOnly')}</p>`:''}
   <div class="card"><h3>${t('hotTitle')}</h3>${hotlinesHTML()}</div>
   ${S.contacts.length===0?`<div class="note">Du hast noch keine Vertrauensperson eingetragen. <button class="ghost wide" style="margin-top:8px" data-a="go" data-v="settings">Jetzt eintragen</button></div>`:''}`;
+  if(HOMETAB==='ueben') body=`${timerBanner}<h1>${de?'Üben':'Practice'}</h1>
+  ${de?`<section class="stack"><h2 class="sect">Zu Hause üben</h2><p class="small muted">${v('Klappt am besten, wenn du in Ruhe bist. Nach 3 Runden schlag ich dir die Übung auch in schweren Momenten vor.','Wirkt am besten in ruhiger Umgebung. Nach 3 Runden schlägt Anker die Übung auch in akuten Momenten vor.','Wirkt am besten in ruhiger Umgebung. Nach 3 Runden schlägt Anker die Übung auch in akuten Momenten vor.')}</p>
+  <div class="list">${lrow('ex','schublade',ICON.drawer,'Meine Schublade','Gedanken weglegen',meterHTML('schublade'))}${lrow('ex','traum',ICON.sun,'Traumreise','An deinen sicheren Ort',meterHTML('traum'))}${lrow('ex','bilder',ICON.image,'Bilderraten','Genau hinschauen',meterHTML('bilder'))}</div></section>`:''}
+  <section class="stack"><h2 class="sect">${de?'Körper & Kopf':'Body & mind'}</h2><div class="list">
+    ${lrow('ex','muskel',ICON.breath,EXINFO.muskel.name(),de?'Spannung abbauen':'')}
+    ${lrow('ex','rechnen',ICON.calc,EXINFO.rechnen.name(),de?'Kopf ablenken':'')}
+    ${lrow('go','thought',ICON.bulb,t('t_thought'),de?'Angstgedanken prüfen':'')}</div></section>
+  <section class="stack"><h2 class="sect">${de?'Mutig werden':'Getting braver'}</h2><div class="list">
+    ${lrow('go','train',ICON.talk,t('t_train'),de?'Gespräche üben ohne Druck':'')}
+    ${lrow('go','steps',ICON.steps,t('t_steps'),de?'Schritt für Schritt unter Leute':'')}</div></section>
+  ${!de?`<p class="small muted">${t('deOnly')}</p>`:''}`;
+  if(HOMETAB==='plan') body=`${timerBanner}<h1>${de?'Mein Plan':'My plan'}</h1>
+  <section class="stack"><h2 class="sect">${de?'Vorbereitet sein':'Be prepared'}</h2><div class="list">
+    ${lrow('go','plan',ICON.plan,t('t_plan'),de?'Meine Sätze für schwere Momente':'')}
+    ${lrow('go','skills',ICON.box,t('t_skills'),de?'Was mir hilft':'')}
+    ${de?lrow('go','drawer',ICON.lock,'Meine Schublade',S.drawer.length?`${S.drawer.length} Zettel drin`:'Noch leer'):''}
+    ${lrow('go','settings',ICON.phone,de?'Vertrauenspersonen':'Trusted contacts',de?(S.contacts.length?`${S.contacts.length} eingetragen`:'Noch niemand eingetragen'):'')}</div></section>
+  <section class="stack"><h2 class="sect">${de?'Rückblick':'Review'}</h2><div class="list">
+    ${lrow('go','diary',ICON.book,t('t_diary'),de?`${S.diary.length} Einträge`:'')}
+    ${lrow('go','report',ICON.chart,t('t_report'),de?'Für Therapie & Arzt':'')}</div></section>
+  <section class="stack"><h2 class="sect">${de?'Für andere':'For others'}</h2><div class="list">
+    ${minor()?lrow('go','eltern',ICON.plan,'Für Eltern',de?'So helft ihr':''):lrow('go','helfer',ICON.plan,'Für Helfer',de?'Info für Vertraute':'')}</div></section>
+  ${!de?`<p class="small muted">${t('deOnly')}</p>`:''}`;
+  return top+body+bar;
 };
 
 /* ---- Hilfe-Dialog ---- */
@@ -564,15 +605,6 @@ function pc(k){return (S.practice&&S.practice[k])||0}
 function unlocked(k){return S.lang==='de'&&pc(k)>=UNLOCK}
 function countPractice(k){S.practice=Object.assign({},S.practice);const b=pc(k);S.practice[k]=b+1;save();return b<UNLOCK&&b+1>=UNLOCK}
 function withHome(base,w){const fit=(HOMEFIT[w]||[]).filter(unlocked).sort((a,b)=>pc(b)-pc(a));if(!fit.length)return base;const p=base.slice();p.splice(1,0,fit[0]);return p.slice(0,3)}
-function homePractice(){
-  if(S.lang!=='de')return '';
-  const meta={schublade:[ICON.drawer,'Gedanken weglegen'],traum:[ICON.sun,'An deinen sicheren Ort'],bilder:[ICON.image,'Genau hinschauen']};
-  const tile=k=>{const n=pc(k),u=n>=UNLOCK;return `<button class="tile" data-a="ex" data-v="${k}">${meta[k][0]}<div>${EXINFO[k].name()}<br><span class="sub">${meta[k][1]}</span>
-    ${u?`<br><span class="sub unl">✓ ${v('Auch für Notfälle','Auch für Notfälle','Auch für Notfälle')}</span>`:`<div class="meter" aria-label="${n} von ${UNLOCK} geübt">${Array.from({length:UNLOCK},(_,i)=>`<i class="${i<n?'on':''}"></i>`).join('')}</div>`}</div></button>`};
-  return `<div class="sechead"><h2>Üben zu Hause</h2><p class="small muted">${v('Diese Übungen klappen am besten, wenn du in Ruhe bist, zum Beispiel zu Hause. Hast du eine 3-mal gemacht, schlag ich sie dir auch in schweren Momenten vor.','Diese Übungen wirken am besten in ruhiger Umgebung, zum Beispiel zu Hause. Nach 3 Übungsrunden schlägt Anker sie auch in akuten Momenten vor.','Diese Übungen wirken am besten in ruhiger Umgebung, zum Beispiel zu Hause. Nach 3 Übungsrunden schlägt Anker sie Ihnen auch in akuten Momenten vor.')}</p></div>
-  <div class="grid">${HOMEEX.map(tile).join('')}
-    <button class="tile" data-a="go" data-v="drawer">${ICON.lock}<div>Schublade öffnen<br><span class="sub">${S.drawer.length?`${S.drawer.length} ${S.drawer.length===1?'Zettel':'Zettel'} drin`:'Noch leer'}</span></div></button></div>`;
-}
 const PLANS={panik:['atem','g54321','muskel'],gedanken:['g54321','rechnen','atem'],wut:['muskel','atem','skill'],leere:['g54321','skill','atem'],anders:['atem','g54321','skill']};
 
 async function helpFlow(){
@@ -1282,6 +1314,7 @@ function addContact(){
 function act(a,d,e){
   switch(a){
     case 'home':return go('home');
+    case 'tab':HOMETAB=d.v;render();return window.scrollTo(0,0);
     case 'go':return go(d.v);
     case 'help':return go(S.setup?'help':'setup');
     case 'ex':return go('ex',{ex:d.v});
@@ -1293,7 +1326,7 @@ function act(a,d,e){
       save();V.step=(V.step||0)+1;return render();
     case 'setup-skip':V.step++;return render();
     case 'setup-back':if(V.step===6)readPlan();V.step--;return render();
-    case 'setup-done':S.setup=true;save();return go('home');
+    case 'setup-done':HOMETAB='hilfe';S.setup=true;save();return go('home');
     case 'set-age':S.age=d.v;if(d.v==='kind')S.tone='kumpel';save();return render();
     case 'set-tone':case 'tone2':S.tone=d.v;save();return render();
     case 'add-contact':return addContact();
